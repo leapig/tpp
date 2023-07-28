@@ -1,0 +1,4 @@
+github.com/bitly/go-simplejson v0.5.1 h1:xgwPbetQScXt1gh9BmoJ6j9JMr3TElvuIyjR8pgdoow=
+github.com/bitly/go-simplejson v0.5.1/go.mod h1:YOPVLzCfwK14b4Sff3oP1AmGhI9T9Vsg84etUnlyp+Q=
+github.com/faabiosr/cachego v0.22.1 h1:YeiGTuoN58k0FcYEuymw9ROjQ76V8RwlwWoiMqFYYDQ=
+github.com/faabiosr/cachego v0.22.1/go.mod h1:I6Bri5FxdNQ/EfJGb9aHwvryC8wLdR4GdH3vgPK0NcQ=
