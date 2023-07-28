@@ -6,7 +6,7 @@
 ## 快速开始 & demo
 
 ```shell script
-go get github.com/fastwego/dingding
+go get github.com/leapig/tpp
 ```
 
 ```go
