@@ -3,6 +3,7 @@ package util
 import (
 	"encoding/json"
 	"github.com/faabiosr/cachego"
+	"net/http"
 	"net/url"
 	"sync"
 	"time"
@@ -30,14 +31,28 @@ func (a AccessToken) GetAccessToken() (token string) {
 
 	resp := a.GetRefreshRequestFunc()
 	var res struct {
-		Errcode     int    `json:"errcode"`
-		Errmsg      string `json:"errmsg"`
-		AccessToken string `json:"access_token"`
-		ExpiresIn   int    `json:"expires_in"`
+		AccessToken           string `json:"access_token"`
+		AccessDingToken       string `json:"accessToken"`
+		AuthorizerAccessToken string `json:"authorizer_access_token"`
+		AccessLarkToken       string `json:"tenant_access_token"`
+		ExpiresIn             int    `json:"expires_in"`
+		Expire                int    `json:"expire"`
 	}
 	_ = json.Unmarshal(resp, &res)
-	if res.Errcode == 0 {
+	if res.AccessToken != "" {
 		token = res.AccessToken
+		d := time.Duration(res.ExpiresIn) * time.Second
+		_ = a.Cache.Save("access_token:"+a.Id, token, d)
+	} else if res.AuthorizerAccessToken != "" {
+		token = res.AuthorizerAccessToken
+		d := time.Duration(res.ExpiresIn) * time.Second
+		_ = a.Cache.Save("access_token:"+a.Id, token, d)
+	} else if res.AccessLarkToken != "" {
+		token = res.AccessLarkToken
+		d := time.Duration(res.Expire) * time.Second
+		_ = a.Cache.Save("access_token:"+a.Id, token, d)
+	} else if res.AccessDingToken != "" {
+		token = res.AccessDingToken
 		d := time.Duration(res.ExpiresIn) * time.Second
 		_ = a.Cache.Save("access_token:"+a.Id, token, d)
 	}
@@ -47,4 +62,9 @@ func (a AccessToken) GetAccessToken() (token string) {
 func (a AccessToken) ApplyAccessToken(url url.Values) url.Values {
 	url.Add("access_token", a.GetAccessToken())
 	return url
+}
+
+func (a AccessToken) SetLarkAccessToken(header http.Header) http.Header {
+	header.Set("Authorization", "Bearer "+a.GetAccessToken())
+	return header
 }
