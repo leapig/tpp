@@ -7,3 +7,9 @@ require (
 	github.com/faabiosr/cachego v0.22.1
 	github.com/go-pay/gopay v1.5.104
 )
+
+require (
+	github.com/go-pay/crypto v0.0.1 // indirect
+	github.com/go-pay/xlog v0.0.3 // indirect
+	github.com/go-pay/xtime v0.0.2 // indirect
+)
