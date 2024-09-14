@@ -1,14 +1,14 @@
 package tpp
 
 import (
-	"tpp/ap"
-	"tpp/dt"
-	"tpp/fs"
-	"tpp/mp"
-	"tpp/oa"
-	"tpp/wk"
-	"tpp/wo"
-	"tpp/ww"
+	"github.com/leapig/tpp/ap"
+	"github.com/leapig/tpp/dt"
+	"github.com/leapig/tpp/fs"
+	"github.com/leapig/tpp/mp"
+	"github.com/leapig/tpp/oa"
+	"github.com/leapig/tpp/wk"
+	"github.com/leapig/tpp/wo"
+	"github.com/leapig/tpp/ww"
 )
 
 type Tpp interface {
