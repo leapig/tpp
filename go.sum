@@ -1,7 +1,7 @@
 github.com/bitly/go-simplejson v0.5.1 h1:xgwPbetQScXt1gh9BmoJ6j9JMr3TElvuIyjR8pgdoow=
 github.com/bitly/go-simplejson v0.5.1/go.mod h1:YOPVLzCfwK14b4Sff3oP1AmGhI9T9Vsg84etUnlyp+Q=
-github.com/faabiosr/cachego v0.22.1 h1:YeiGTuoN58k0FcYEuymw9ROjQ76V8RwlwWoiMqFYYDQ=
-github.com/faabiosr/cachego v0.22.1/go.mod h1:I6Bri5FxdNQ/EfJGb9aHwvryC8wLdR4GdH3vgPK0NcQ=
+github.com/faabiosr/cachego v0.22.2 h1:uGqEsNlyCTe6JOEKpvE0dq8nnk/EZlkztm3NVfdHsBs=
+github.com/faabiosr/cachego v0.22.2/go.mod h1:MouiH/OC8/rap7nkIGj7Oe0bITC+CaWR9UN9tTNVAt8=
 github.com/go-pay/crypto v0.0.1 h1:B6InT8CLfSLc6nGRVx9VMJRBBazFMjr293+jl0lLXUY=
 github.com/go-pay/crypto v0.0.1/go.mod h1:41oEIvHMKbNcYlWUlRWtsnC6+ASgh7u29z0gJXe5bes=
 github.com/go-pay/gopay v1.5.104 h1:XMftoDnMf/2P3o11jYzqvAzAihum5fVPQVmQ6LgSeEY=
