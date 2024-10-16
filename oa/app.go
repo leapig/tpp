@@ -20,7 +20,7 @@ type App interface {
 	Id() string
 	Test() string
 	GetAccountBasicInfo() (res map[string]interface{})
-	QrcodeCreate(scene string) (res map[string]interface{})
+	QrcodeCreate(scene string, limit bool) (res map[string]interface{})
 	TemplateGetAllPrivateTemplate() []interface{}
 	TemplateApiAddTemplate(templateIdShort int, keywordNameList []string) (templateId string)
 	TemplateDelPrivateTemplate(templateId string) (res bool)
@@ -111,10 +111,14 @@ func (a *app) GetAccountBasicInfo() (res map[string]interface{}) {
 }
 
 // QrcodeCreate https://api.weixin.qq.com/cgi-bin/qrcode/create
-func (a *app) QrcodeCreate(scene string) (res map[string]interface{}) {
+func (a *app) QrcodeCreate(scene string, limit bool) (res map[string]interface{}) {
 	params := url.Values{}
 	params = a.token.ApplyAccessToken(params)
-	payload := []byte(`{"action_name": "QR_LIMIT_STR_SCENE", "action_info": {"scene": {"scene_str": "` + scene + `"}}}`)
+	actionName := "QR_STR_SCENE"
+	if limit {
+		actionName = "QR_LIMIT_STR_SCENE"
+	}
+	payload := []byte(`{ "action_name": "` + actionName + `", "action_info": {"scene": {"scene_str": "` + scene + `"}}}`)
 	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/qrcode/create?"+params.Encode(), bytes.NewReader(payload))
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
