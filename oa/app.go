@@ -179,14 +179,17 @@ func (a *app) TemplateDelPrivateTemplate(templateId string) (res bool) {
 
 // Message 微信模板消息结构体
 type Message struct {
-	Touser      string `json:"touser"`
-	TemplateId  string `json:"template_id"`
-	Url         string `json:"url,omitempty"`
-	Miniprogram struct {
-		Appid    string `json:"appid,omitempty"`
-		Pagepath string `json:"pagepath,omitempty"`
-	} `json:"miniprogram,omitempty"`
-	Data interface{} `json:"data"`
+	Touser      string      `json:"touser"`
+	TemplateId  string      `json:"template_id"`
+	Url         string      `json:"url,omitempty"`
+	Miniprogram Miniprogram `json:"miniprogram,omitempty"`
+	Data        interface{} `json:"data"`
+}
+
+// Miniprogram 微信小程序配置定义
+type Miniprogram struct {
+	Appid    string `json:"appid,omitempty"`
+	Pagepath string `json:"pagepath,omitempty"`
 }
 
 // MessageTemplateSend POST https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN
