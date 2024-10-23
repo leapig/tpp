@@ -15,14 +15,16 @@ import (
 )
 
 type App interface {
+	Key() string
 	Id() string
-	Test() string
+	Token() string
 	JsCode2Session(jsCode string) map[string]interface{}
 	GetWxACodeUnLimit(page, scene string) []byte
 	PostWxaBusinessGetUserPhoneNumber(code string) (res map[string]interface{})
 }
 
 type Config struct {
+	Key     string `json:"key"`
 	AppId   string `json:"appid"`
 	Secret  string `json:"secret"`
 	Version string `json:"version"`
@@ -56,13 +58,18 @@ func NewApp(config Config) App {
 	}
 }
 
+// Key 获取当前实例ID
+func (a *app) Key() string {
+	return a.config.Key
+}
+
 // Id 获取当前实例ID
 func (a *app) Id() string {
 	return a.config.AppId
 }
 
-// Test 校验是否配置是否正常（返回access_token）
-func (a *app) Test() string {
+// Token 校验是否配置是否正常（返回access_token）
+func (a *app) Token() string {
 	return a.token.GetAccessToken()
 }
 

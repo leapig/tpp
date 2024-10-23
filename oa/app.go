@@ -17,8 +17,9 @@ import (
 )
 
 type App interface {
+	Key() string
 	Id() string
-	Test() string
+	Token() string
 	GetAccountBasicInfo() (res map[string]interface{})
 	QrcodeCreate(scene string, limit bool) (res map[string]interface{})
 	TemplateGetAllPrivateTemplate() []interface{}
@@ -37,9 +38,12 @@ type App interface {
 type GetComponentAccessToken func() string
 
 type Config struct {
-	RegionRid         int64  `json:"regionRid"`
+	Tenant            int64  `json:"tenant"`
+	Key               string `json:"key"`
 	AppId             string `json:"appid"`
 	Secret            string `json:"secret"`
+	Token             string `json:"token"`
+	AesKey            string `json:"aes_key"`
 	ComponentAppid    string `json:"component_appid"`
 	GetComponentToken GetComponentAccessToken
 }
@@ -87,13 +91,18 @@ func NewApp(config Config) App {
 	}
 }
 
+// Key 获取当前实例Key
+func (a *app) Key() string {
+	return a.config.Key
+}
+
 // Id 获取当前实例ID
 func (a *app) Id() string {
 	return a.config.AppId
 }
 
-// Test 校验是否配置是否正常（返回access_token）
-func (a *app) Test() string {
+// Token 校验是否配置是否正常（返回access_token）
+func (a *app) Token() string {
 	return a.token.GetAccessToken()
 }
 
