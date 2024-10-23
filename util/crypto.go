@@ -106,8 +106,8 @@ func (self *XmlProcessor) serialize(msg4_send *WXBizMsg4Send) ([]byte, *CryptErr
 	return xml_msg, nil
 }
 
-func NewWXBizMsgCrypt(receiver_id string) *WXBizMsgCrypt {
-	return &WXBizMsgCrypt{token: "91BxDcWOdJ1PUBngaOkgsH9B", encoding_aeskey: "yOocubSvv527UCbHOL2TkTPygLUcbBAgSaZgtKvZlAs=", receiver_id: receiver_id, protocol_processor: new(XmlProcessor)}
+func NewWXBizMsgCrypt(appId, token, aesKey string) *WXBizMsgCrypt {
+	return &WXBizMsgCrypt{token: token, encoding_aeskey: aesKey, receiver_id: appId, protocol_processor: new(XmlProcessor)}
 }
 
 func (self *WXBizMsgCrypt) pKCS7Padding(plaintext string, block_size int) []byte {
