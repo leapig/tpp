@@ -16,6 +16,9 @@ import (
 	"time"
 )
 
+const JSAPI = "jsapi"
+const WXCARD = "wx_card"
+
 type App interface {
 	Key() string
 	Id() string
@@ -31,7 +34,7 @@ type App interface {
 	GetCurrentSelfMenuInfo() (res map[string]interface{})
 	MenuCreate(button []Button) (err error)
 	MenuDelete() (res bool)
-	TicketGetTicket() (ticket string)
+	TicketGetTicket(ticketType string) (ticket string)
 	AuthorizationCode(code string) (res map[string]interface{})
 }
 
@@ -309,11 +312,11 @@ func (a *app) MenuDelete() (res bool) {
 }
 
 // TicketGetTicket GET https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=ACCESS_TOKEN&type=jsapi
-func (a *app) TicketGetTicket() (ticket string) {
+func (a *app) TicketGetTicket(ticketType string) (ticket string) {
 	ticket, _ = a.token.Cache.Fetch("ticket" + a.token.Id)
 	if ticket == "" {
 		params := url.Values{}
-		params.Add("type", "jsapi")
+		params.Add("type", ticketType)
 		params = a.token.ApplyAccessToken(params)
 		if response, err := http.Get(a.server + "/cgi-bin/ticket/getticket?" + params.Encode()); err == nil {
 			if resp, err := io.ReadAll(response.Body); err == nil {
