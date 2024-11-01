@@ -36,6 +36,7 @@ type App interface {
 	MenuDelete() (res bool)
 	TicketGetTicket(ticketType string) (ticket string)
 	AuthorizationCode(code string) (res map[string]interface{})
+	CardCodeDecrypt(encryptCode string) (code string)
 }
 
 type GetComponentAccessToken func() string
@@ -358,6 +359,23 @@ func (a *app) AuthorizationCode(code string) (res map[string]interface{}) {
 					res = js.MustMap()
 				}
 			}
+		}
+	}
+	return
+}
+
+// CardCodeDecrypt POST https://api.weixin.qq.com/card/code/decrypt?access_token=TOKEN
+func (a *app) CardCodeDecrypt(encryptCode string) (code string) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	payload, _ := json.Marshal(map[string]interface{}{
+		"encrypt_code": encryptCode,
+	})
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/card/code/decrypt?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			code = js.Get("code").MustString()
 		}
 	}
 	return
