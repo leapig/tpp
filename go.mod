@@ -7,6 +7,7 @@ require (
 	github.com/faabiosr/cachego v0.22.2
 	github.com/go-pay/gopay v1.5.104
 	github.com/natefinch/lumberjack v2.0.0+incompatible
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	go.uber.org/zap v1.27.0
 )
 
