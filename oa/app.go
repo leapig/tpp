@@ -7,6 +7,7 @@ import (
 	"fmt"
 	json2 "github.com/bitly/go-simplejson"
 	"github.com/faabiosr/cachego/file"
+	"github.com/leapig/tpp/logger"
 	"github.com/leapig/tpp/util"
 	"io"
 	"net/http"
@@ -117,6 +118,7 @@ func (a *app) GetAccountBasicInfo() (res map[string]interface{}) {
 	if response, err := http.Get(a.server + "/cgi-bin/account/getaccountbasicinfo?" + params.Encode()); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("GetAccountBasicInfo:%+v", js)
 			res = js.MustMap()
 		}
 	}
@@ -136,6 +138,7 @@ func (a *app) QrcodeCreate(scene string, limit bool) (res map[string]interface{}
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("QrcodeCreate:%+v", js)
 			res = js.MustMap()
 		}
 	}
@@ -149,6 +152,7 @@ func (a *app) TemplateGetAllPrivateTemplate() (res []interface{}) {
 	if response, err := http.Get(a.server + "/cgi-bin/template/get_all_private_template?" + params.Encode()); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("TemplateGetAllPrivateTemplate:%+v", js)
 			res = js.Get("template_list").MustArray()
 		}
 	}
@@ -167,6 +171,7 @@ func (a *app) TemplateApiAddTemplate(templateIdShort int, keywordNameList []stri
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("TemplateApiAddTemplate:%+v", js)
 			templateId = js.Get("template_id").MustString()
 		}
 	}
@@ -184,6 +189,7 @@ func (a *app) TemplateDelPrivateTemplate(templateId string) (res bool) {
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("TemplateDelPrivateTemplate:%+v", js)
 			res = js.Get("errcode").MustInt() == 0
 		}
 	}
@@ -214,6 +220,7 @@ func (a *app) MessageTemplateSend(msg Message) (err error) {
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("MessageTemplateSend:%+v", js)
 			if js.Get("errcode").MustInt() != 0 {
 				err = errors.New(js.Get("errmsg").MustString())
 			}
@@ -232,6 +239,7 @@ func (a *app) UserGet(nextOpenid string) (res map[string]interface{}) {
 	if response, err := http.Get(a.server + "/cgi-bin/user/get?" + params.Encode()); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("UserGet:%+v", js)
 			res = js.MustMap()
 		}
 	}
@@ -246,6 +254,7 @@ func (a *app) UserInfo(openId string) (res map[string]interface{}) {
 	if response, err := http.Get(a.server + "/cgi-bin/user/info?" + params.Encode()); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("UserInfo:%+v", js)
 			res = js.MustMap()
 		}
 	}
@@ -259,6 +268,7 @@ func (a *app) GetCurrentSelfMenuInfo() (res map[string]interface{}) {
 	if response, err := http.Get(a.server + "/cgi-bin/get_current_selfmenu_info?" + params.Encode()); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("GetCurrentSelfMenuInfo:%+v", js)
 			res = js.MustMap()
 		}
 	}
@@ -291,6 +301,7 @@ func (a *app) MenuCreate(button []Button) error {
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("MenuCreate:%+v", js)
 			if js.Get("errcode").MustInt() != 0 {
 				return errors.New(js.Get("errmsg").MustString())
 			}
@@ -306,6 +317,7 @@ func (a *app) MenuDelete() (res bool) {
 	if response, err := http.Get(a.server + "/cgi-bin/menu/delete?" + params.Encode()); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("MenuDelete:%+v", js)
 			res = js.Get("errcode").MustInt() == 0
 		}
 	}
@@ -322,6 +334,7 @@ func (a *app) TicketGetTicket(ticketType string) (ticket string) {
 		if response, err := http.Get(a.server + "/cgi-bin/ticket/getticket?" + params.Encode()); err == nil {
 			if resp, err := io.ReadAll(response.Body); err == nil {
 				js, _ := json2.NewJson(resp)
+				logger.Debugf("TicketGetTicket:%+v", js)
 				if js.Get("errcode").MustInt() == 0 {
 					ticket = js.Get("ticket").MustString()
 					d := time.Duration(js.Get("expires_in").MustInt()) * time.Second
@@ -345,6 +358,7 @@ func (a *app) AuthorizationCode(code string) (res map[string]interface{}) {
 		if response, err := http.Get(a.server + "/sns/oauth2/component/access_token?" + params.Encode()); err == nil {
 			if resp, err := io.ReadAll(response.Body); err == nil {
 				js, _ := json2.NewJson(resp)
+				logger.Debugf("AuthorizationCode:%+v", js)
 				if js.Get("Openid") != nil {
 					res = js.MustMap()
 				}
@@ -355,6 +369,7 @@ func (a *app) AuthorizationCode(code string) (res map[string]interface{}) {
 		if response, err := http.Get(a.server + "/sns/oauth2/access_token?" + params.Encode()); err == nil {
 			if resp, err := io.ReadAll(response.Body); err == nil {
 				js, _ := json2.NewJson(resp)
+				logger.Debugf("AuthorizationCode:%+v", js)
 				if js.Get("Openid") != nil {
 					res = js.MustMap()
 				}
@@ -375,6 +390,7 @@ func (a *app) CardCodeDecrypt(encryptCode string) (code string) {
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("CardCodeDecrypt:%+v", js)
 			code = js.Get("code").MustString()
 		}
 	}
