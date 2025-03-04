@@ -7,6 +7,7 @@ import (
 	"fmt"
 	json2 "github.com/bitly/go-simplejson"
 	"github.com/faabiosr/cachego/file"
+	"github.com/leapig/tpp/logger"
 	"github.com/leapig/tpp/util"
 	"io"
 	"net/http"
@@ -83,6 +84,7 @@ func (a *app) JsCode2Session(jsCode string) (res map[string]interface{}) {
 	if response, err := http.Get(a.server + "/sns/jscode2session?" + params.Encode()); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("CardCodeDecrypt:%+v", js)
 			if js.Get("openid").MustString() != "" {
 				res = js.MustMap()
 			}
@@ -121,6 +123,7 @@ func (a *app) PostWxaBusinessGetUserPhoneNumber(code string) (res map[string]int
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
+			logger.Debugf("CardCodeDecrypt:%+v", js)
 			if js.Get("errcode").MustInt() != 0 {
 				err = errors.New(js.Get("errmsg").MustString())
 			}
