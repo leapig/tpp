@@ -18,41 +18,37 @@ import (
 )
 
 func CompressBase64(base64Str string, minTargetSize, maxTargetSize int64) (string, error) {
-	fmt.Println(getSize(base64Str))
 	maxTargetSize = maxTargetSize * 1000
 	minTargetSize = minTargetSize * 1000
 	size := getSize(base64Str)
-	if size < minTargetSize {
+	if size <= maxTargetSize {
 		// 小于最小压缩尺寸，不压缩
 		return base64Str, nil
-	} else if size > maxTargetSize {
+	} else {
 		// 大于最大压缩尺寸，压缩到最大尺寸
 		return compress(resizeImage(base64Str), minTargetSize, maxTargetSize), nil
-	} else {
-		return base64Str, nil
 	}
 }
 
 func compress(str string, minTargetSize, maxTargetSize int64) string {
 	size := getSize(str)
-	fmt.Println(size)
-	if size < minTargetSize {
+	fmt.Println("compress file size is:", size)
+	if size <= maxTargetSize {
 		// 小于最小压缩尺寸，不压缩
 		return str
-	} else if size > maxTargetSize {
+	} else {
 		// 大于最大压缩尺寸，压缩到最大尺寸
-		size := getSize(str)
 		radio := big.NewFloat(0)
 		radio.Quo(big.NewFloat(float64((maxTargetSize+minTargetSize)/2)), big.NewFloat(float64(size)))
 		result := big.NewFloat(0)
-		result.Add(radio, big.NewFloat(0.02))
+		//result.Add(radio, big.NewFloat(0.02))
 		ra := result.Text('f', 2)
 		floatValue, _ := strconv.ParseFloat(ra, 64)
 		quality := int(floatValue * 100)
 		body, _ := base64.StdEncoding.DecodeString(str)
 		img, _, e := image.Decode(bytes.NewBuffer(body))
 		if e != nil {
-			fmt.Println(e)
+			fmt.Println("compress error is:", e)
 		}
 		var buffer bytes.Buffer
 		if quality > 100 {
@@ -63,8 +59,6 @@ func compress(str string, minTargetSize, maxTargetSize int64) string {
 		_ = jpeg.Encode(&buffer, img, &jpeg.Options{Quality: quality})
 		res := base64.StdEncoding.EncodeToString(buffer.Bytes())
 		return compress(res, minTargetSize, maxTargetSize)
-	} else {
-		return str
 	}
 }
 
@@ -72,7 +66,7 @@ func resizeImage(str string) string {
 	body, _ := base64.StdEncoding.DecodeString(str)
 	img, _, e := image.Decode(bytes.NewBuffer(body))
 	if e != nil {
-		fmt.Println(e)
+		fmt.Println("resizeImage error:", e)
 	}
 	width := img.Bounds().Dx()
 	height := img.Bounds().Dy()
