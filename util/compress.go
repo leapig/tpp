@@ -11,55 +11,97 @@ import (
 	_ "image/jpeg"
 	"image/png"
 	_ "image/png"
-	"math/big"
 	"math/rand"
-	"strconv"
 	"time"
 )
 
-func CompressBase64(base64Str string, minTargetSize, maxTargetSize int64) (string, error) {
-	maxTargetSize = maxTargetSize * 1000
-	minTargetSize = minTargetSize * 1000
+func CompressBase64(base64Str string, targetSize int64) (string, error) {
+	maxTargetSize := targetSize * 1000
 	size := getSize(base64Str)
 	if size <= maxTargetSize {
 		// 小于最小压缩尺寸，不压缩
 		return base64Str, nil
 	} else {
 		// 大于最大压缩尺寸，压缩到最大尺寸
-		return compress(resizeImage(base64Str), minTargetSize, maxTargetSize), nil
+		return compress(resizeImage(base64Str), maxTargetSize), nil
 	}
 }
 
-func compress(str string, minTargetSize, maxTargetSize int64) string {
-	size := getSize(str)
-	fmt.Println("compress file size is:", size)
-	if size <= maxTargetSize {
-		// 小于最小压缩尺寸，不压缩
-		return str
-	} else {
-		// 大于最大压缩尺寸，压缩到最大尺寸
-		radio := big.NewFloat(0)
-		radio.Quo(big.NewFloat(float64((maxTargetSize+minTargetSize)/2)), big.NewFloat(float64(size)))
-		result := big.NewFloat(0)
-		//result.Add(radio, big.NewFloat(0.02))
-		ra := result.Text('f', 2)
-		floatValue, _ := strconv.ParseFloat(ra, 64)
-		quality := int(floatValue * 100)
-		body, _ := base64.StdEncoding.DecodeString(str)
-		img, _, e := image.Decode(bytes.NewBuffer(body))
-		if e != nil {
-			fmt.Println("compress error is:", e)
+func compress(str string, maxTargetSize int64) string {
+	var (
+		quality     = 100
+		currentStr  = str
+		minQuality  = 30
+		maxAttempts = 10 // 防止无限循环的安全阀
+	)
+
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		size := getSize(currentStr)
+		if size <= maxTargetSize || quality <= minQuality {
+			break
 		}
+
+		// 动态调整质量参数
+		ratio := float64(maxTargetSize) / float64(size)
+		quality = int(float64(quality) * ratio)
+		if quality < minQuality {
+			quality = minQuality
+		}
+
+		// 图像处理流程
+		body, err := base64.StdEncoding.DecodeString(currentStr)
+		if err != nil {
+			fmt.Println("base64 decode error:", err)
+			return currentStr
+		}
+
+		img, _, err := image.Decode(bytes.NewBuffer(body))
+		if err != nil {
+			fmt.Println("image decode error:", err)
+			return currentStr
+		}
+
 		var buffer bytes.Buffer
-		if quality > 100 {
-			quality = 100
-		} else if quality < 30 {
-			quality = 30
+		if err := jpeg.Encode(&buffer, img, &jpeg.Options{Quality: quality}); err != nil {
+			fmt.Println("jpeg encode error:", err)
+			return currentStr
 		}
-		_ = jpeg.Encode(&buffer, img, &jpeg.Options{Quality: quality})
-		res := base64.StdEncoding.EncodeToString(buffer.Bytes())
-		return compress(res, minTargetSize, maxTargetSize)
+
+		currentStr = base64.StdEncoding.EncodeToString(buffer.Bytes())
+		quality = int(float64(quality) * 0.9) // 渐进式质量下降
 	}
+	return currentStr
+
+	//
+	//size := getSize(str)
+	//fmt.Println("compress file size is:", size)
+	//if size <= maxTargetSize {
+	//	// 小于最小压缩尺寸，不压缩
+	//	return str
+	//} else {
+	//	// 大于最大压缩尺寸，压缩到最大尺寸
+	//	radio := big.NewFloat(0)
+	//	radio.Quo(big.NewFloat(float64(maxTargetSize)), big.NewFloat(float64(size)))
+	//	result := big.NewFloat(0)
+	//	//result.Add(radio, big.NewFloat(0.02))
+	//	ra := result.Text('f', 2)
+	//	floatValue, _ := strconv.ParseFloat(ra, 64)
+	//	quality := int(floatValue * 100)
+	//	body, _ := base64.StdEncoding.DecodeString(str)
+	//	img, _, e := image.Decode(bytes.NewBuffer(body))
+	//	if e != nil {
+	//		fmt.Println("compress error is:", e)
+	//	}
+	//	var buffer bytes.Buffer
+	//	if quality > 100 {
+	//		quality = 100
+	//	} else if quality < 30 {
+	//		quality = 30
+	//	}
+	//	_ = jpeg.Encode(&buffer, img, &jpeg.Options{Quality: quality})
+	//	res := base64.StdEncoding.EncodeToString(buffer.Bytes())
+	//	return compress(res, maxTargetSize)
+	//}
 }
 
 func resizeImage(str string) string {
@@ -72,12 +114,12 @@ func resizeImage(str string) string {
 	height := img.Bounds().Dy()
 	var targetWidth, targetHeight uint
 	if width >= height {
-		radio := height / 480
+		radio := height / 360
 		targetWidth = uint(width / radio)
-		targetHeight = 480
+		targetHeight = 360
 	} else {
-		radio := width / 480
-		targetWidth = 480
+		radio := width / 360
+		targetWidth = 360
 		targetHeight = uint(height / radio)
 	}
 	targetImg := resize.Resize(targetWidth, targetHeight, img, resize.Lanczos3)
