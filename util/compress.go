@@ -114,12 +114,12 @@ func resizeImage(str string) string {
 	height := img.Bounds().Dy()
 	var targetWidth, targetHeight uint
 	if width >= height {
-		radio := height / 360
+		radio := height / 420
 		targetWidth = uint(width / radio)
-		targetHeight = 360
+		targetHeight = 420
 	} else {
-		radio := width / 360
-		targetWidth = 360
+		radio := width / 420
+		targetWidth = 420
 		targetHeight = uint(height / radio)
 	}
 	targetImg := resize.Resize(targetWidth, targetHeight, img, resize.Lanczos3)
