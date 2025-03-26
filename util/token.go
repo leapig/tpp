@@ -32,8 +32,9 @@ func (a AccessToken) GetAccessToken() (token string) {
 	resp := a.GetRefreshRequestFunc()
 	var res struct {
 		AccessToken           string `json:"access_token"`
-		AccessDingToken       string `json:"accessToken"`
+		ComponentAccessToken  string `json:"component_access_token"`
 		AuthorizerAccessToken string `json:"authorizer_access_token"`
+		AccessDingToken       string `json:"accessToken"`
 		AccessLarkToken       string `json:"tenant_access_token"`
 		ExpiresIn             int    `json:"expires_in"`
 		Expire                int    `json:"expire"`
@@ -41,6 +42,10 @@ func (a AccessToken) GetAccessToken() (token string) {
 	_ = json.Unmarshal(resp, &res)
 	if res.AccessToken != "" {
 		token = res.AccessToken
+		d := time.Duration(res.ExpiresIn) * time.Second
+		_ = a.Cache.Save("access_token:"+a.Id, token, d)
+	} else if res.ComponentAccessToken != "" {
+		token = res.AuthorizerAccessToken
 		d := time.Duration(res.ExpiresIn) * time.Second
 		_ = a.Cache.Save("access_token:"+a.Id, token, d)
 	} else if res.AuthorizerAccessToken != "" {
