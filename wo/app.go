@@ -18,6 +18,7 @@ type App interface {
 	Id() string
 	Token() string
 	ApiCreatePreAuthCode() (res map[string]interface{})
+	ApiGetAuthorizerInfo(appId string) (res map[string]interface{})
 }
 
 type Config struct {
@@ -74,6 +75,57 @@ func (a *app) ApiCreatePreAuthCode() (res map[string]interface{}) {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("ApiCreatePreAuthCode:%+v", js)
+			res = js.MustMap()
+		}
+	}
+	return
+}
+
+// ApiGetAuthorizerList POST https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_list?access_token=ACCESS_TOKEN
+func (a *app) ApiGetAuthorizerList() (res []map[string]interface{}) {
+	offset := 0
+	for {
+		if resp := a.apiGetAuthorizerList(offset * 500); resp["total_count"].(int) >= ((offset + 1) * 500) {
+			res = append(res, resp["list"].([]map[string]interface{})...)
+			break
+		} else {
+			res = append(res, resp["list"].([]map[string]interface{})...)
+			offset++
+		}
+	}
+	return res
+}
+
+func (a *app) apiGetAuthorizerList(offset int) (res map[string]interface{}) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	payload, _ := json.Marshal(map[string]interface{}{
+		"component_appid": a.config.AppId,
+		"offset":          offset,
+		"count":           500,
+	})
+	if response, err := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_get_authorizer_list?"+params.Encode(), bytes.NewReader(payload)); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("apiGetAuthorizerList:%+v", js)
+			res = js.MustMap()
+		}
+	}
+	return
+}
+
+// ApiGetAuthorizerInfo POST https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info?access_token=ACCESS_TOKEN
+func (a *app) ApiGetAuthorizerInfo(appId string) (res map[string]interface{}) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	payload, _ := json.Marshal(map[string]string{
+		"component_appid":  a.config.AppId,
+		"authorizer_appid": appId,
+	})
+	if response, err := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_get_authorizer_info?"+params.Encode(), bytes.NewReader(payload)); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("ApiGetAuthorizerInfo:%+v", js)
 			res = js.MustMap()
 		}
 	}
