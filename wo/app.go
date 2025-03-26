@@ -81,6 +81,24 @@ func (a *app) ApiCreatePreAuthCode() (res map[string]interface{}) {
 	return
 }
 
+// ApiQueryAuth POST https://api.weixin.qq.com/cgi-bin/component/api_query_auth?component_access_token=COMPONENT_ACCESS_TOKEN
+func (a *app) ApiQueryAuth(authorizationCode string) (res map[string]interface{}) {
+	params := url.Values{}
+	params.Add("component_access_token", a.Token())
+	payload, _ := json.Marshal(map[string]interface{}{
+		"component_appid":    a.config.AppId,
+		"authorization_code": authorizationCode,
+	})
+	if response, err := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_query_auth?"+params.Encode(), bytes.NewReader(payload)); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("apiGetAuthorizerList:%+v", js)
+			res = js.MustMap()
+		}
+	}
+	return
+}
+
 // ApiGetAuthorizerList POST https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_list?access_token=ACCESS_TOKEN
 func (a *app) ApiGetAuthorizerList() (res []map[string]interface{}) {
 	offset := 0
@@ -115,12 +133,12 @@ func (a *app) apiGetAuthorizerList(offset int) (res map[string]interface{}) {
 }
 
 // ApiGetAuthorizerInfo POST https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info?access_token=ACCESS_TOKEN
-func (a *app) ApiGetAuthorizerInfo(appId string) (res map[string]interface{}) {
+func (a *app) ApiGetAuthorizerInfo(authorizerAppId string) (res map[string]interface{}) {
 	params := url.Values{}
 	params = a.token.ApplyAccessToken(params)
 	payload, _ := json.Marshal(map[string]string{
 		"component_appid":  a.config.AppId,
-		"authorizer_appid": appId,
+		"authorizer_appid": authorizerAppId,
 	})
 	if response, err := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_get_authorizer_info?"+params.Encode(), bytes.NewReader(payload)); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
