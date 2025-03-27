@@ -45,7 +45,7 @@ func (a AccessToken) GetAccessToken() (token string) {
 		d := time.Duration(res.ExpiresIn) * time.Second
 		_ = a.Cache.Save("access_token:"+a.Id, token, d)
 	} else if res.ComponentAccessToken != "" {
-		token = res.AuthorizerAccessToken
+		token = res.ComponentAccessToken
 		d := time.Duration(res.ExpiresIn) * time.Second
 		_ = a.Cache.Save("access_token:"+a.Id, token, d)
 	} else if res.AuthorizerAccessToken != "" {

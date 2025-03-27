@@ -18,6 +18,8 @@ type App interface {
 	Id() string
 	Token() string
 	ApiCreatePreAuthCode() (res map[string]interface{})
+	ApiQueryAuth(authorizationCode string) (res map[string]interface{})
+	ApiGetAuthorizerList() (res []map[string]interface{})
 	ApiGetAuthorizerInfo(appId string) (res map[string]interface{})
 }
 
