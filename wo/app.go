@@ -73,7 +73,10 @@ func (a *app) Token() string {
 func (a *app) ApiCreatePreAuthCode() (res map[string]interface{}) {
 	params := url.Values{}
 	params = a.token.ApplyAccessToken(params)
-	if response, err := http.Get(a.server + "/cgi-bin/component/api_create_preauthcode?" + params.Encode()); err == nil {
+	payload, _ := json.Marshal(map[string]interface{}{
+		"component_appid": a.config.AppId,
+	})
+	if response, err := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_create_preauthcode?"+params.Encode(), bytes.NewReader(payload)); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("ApiCreatePreAuthCode:%+v", js)
