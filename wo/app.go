@@ -76,7 +76,8 @@ func (a *app) ApiCreatePreAuthCode() (res map[string]interface{}) {
 	payload, _ := json.Marshal(map[string]interface{}{
 		"component_appid": a.config.AppId,
 	})
-	if response, err := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_create_preauthcode?"+params.Encode(), bytes.NewReader(payload)); err == nil {
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_create_preauthcode?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("ApiCreatePreAuthCode:%+v", js)
@@ -94,7 +95,8 @@ func (a *app) ApiQueryAuth(authorizationCode string) (res map[string]interface{}
 		"component_appid":    a.config.AppId,
 		"authorization_code": authorizationCode,
 	})
-	if response, err := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_query_auth?"+params.Encode(), bytes.NewReader(payload)); err == nil {
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_query_auth?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("apiGetAuthorizerList:%+v", js)
@@ -127,7 +129,8 @@ func (a *app) apiGetAuthorizerList(offset int) (res map[string]interface{}) {
 		"offset":          offset,
 		"count":           500,
 	})
-	if response, err := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_get_authorizer_list?"+params.Encode(), bytes.NewReader(payload)); err == nil {
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_get_authorizer_list?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("apiGetAuthorizerList:%+v", js)
@@ -145,7 +148,8 @@ func (a *app) ApiGetAuthorizerInfo(authorizerAppId string) (res map[string]inter
 		"component_appid":  a.config.AppId,
 		"authorizer_appid": authorizerAppId,
 	})
-	if response, err := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_get_authorizer_info?"+params.Encode(), bytes.NewReader(payload)); err == nil {
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_get_authorizer_info?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("ApiGetAuthorizerInfo:%+v", js)
