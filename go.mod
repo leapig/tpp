@@ -13,6 +13,7 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
+	github.com/boombuler/barcode v1.0.2 // indirect
 	github.com/go-pay/crypto v0.0.1 // indirect
 	github.com/go-pay/xlog v0.0.3 // indirect
 	github.com/go-pay/xtime v0.0.2 // indirect
