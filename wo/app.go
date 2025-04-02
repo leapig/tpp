@@ -204,7 +204,7 @@ func (a *app) GetTemplateList(templateType int64) (res map[string]interface{}) {
 	payload, _ := json.Marshal(map[string]int64{
 		"template_type": templateType,
 	})
-	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/gettemplatelist?"+params.Encode(), bytes.NewReader(payload))
+	req, _ := http.NewRequest(http.MethodGet, a.server+"/wxa/gettemplatelist?"+params.Encode(), bytes.NewReader(payload))
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
