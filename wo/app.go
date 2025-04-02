@@ -24,7 +24,7 @@ type App interface {
 	GetTemplateDraftList() (res map[string]interface{})
 	AddToTemplate(draftId, templateType int64) (res map[string]interface{})
 	GetTemplateList(templateType int64) (res map[string]interface{})
-	DeleteTemplate(templateId string) (res map[string]interface{})
+	DeleteTemplate(templateId int64) (res map[string]interface{})
 }
 
 type Config struct {
@@ -216,10 +216,10 @@ func (a *app) GetTemplateList(templateType int64) (res map[string]interface{}) {
 }
 
 // DeleteTemplate POST https://api.weixin.qq.com/wxa/deletetemplate?access_token=ACCESS_TOKEN
-func (a *app) DeleteTemplate(templateId string) (res map[string]interface{}) {
+func (a *app) DeleteTemplate(templateId int64) (res map[string]interface{}) {
 	params := url.Values{}
 	params = a.token.ApplyAccessToken(params)
-	payload, _ := json.Marshal(map[string]string{
+	payload, _ := json.Marshal(map[string]int64{
 		"template_id": templateId,
 	})
 	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/deletetemplate?"+params.Encode(), bytes.NewReader(payload))
