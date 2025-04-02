@@ -23,6 +23,8 @@ type App interface {
 	ApiGetAuthorizerInfo(appId string) (res map[string]interface{})
 	GetTemplateDraftList() (res map[string]interface{})
 	AddToTemplate(draftId, templateType int64) (res map[string]interface{})
+	GetTemplateList(templateType int64) (res map[string]interface{})
+	DeleteTemplate(templateId string) (res map[string]interface{})
 }
 
 type Config struct {
