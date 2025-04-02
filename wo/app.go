@@ -21,6 +21,8 @@ type App interface {
 	ApiQueryAuth(authorizationCode string) (res map[string]interface{})
 	ApiGetAuthorizerList() (res []map[string]interface{})
 	ApiGetAuthorizerInfo(appId string) (res map[string]interface{})
+	GetTemplateDraftList() (res map[string]interface{})
+	AddToTemplate(draftId, templateType int64) (res map[string]interface{})
 }
 
 type Config struct {
@@ -153,6 +155,76 @@ func (a *app) ApiGetAuthorizerInfo(authorizerAppId string) (res map[string]inter
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("ApiGetAuthorizerInfo:%+v", js)
+			res = js.MustMap()
+		}
+	}
+	return
+}
+
+// GetTemplateDraftList GET https://api.weixin.qq.com/wxa/gettemplatedraftlist?access_token=ACCESS_TOKEN
+func (a *app) GetTemplateDraftList() (res map[string]interface{}) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	req, _ := http.NewRequest(http.MethodGet, a.server+"/wxa/gettemplatedraftlist?"+params.Encode(), nil)
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("GetTemplateDraftList:%+v", js)
+			res = js.MustMap()
+		}
+	}
+	return
+}
+
+// AddToTemplate POST https://api.weixin.qq.com/wxa/addtotemplate?access_token=ACCESS_TOKEN
+func (a *app) AddToTemplate(draftId, templateType int64) (res map[string]interface{}) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	payload, _ := json.Marshal(map[string]int64{
+		"draft_id":      draftId,
+		"template_type": templateType,
+	})
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/addtotemplate?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("AddToTemplate:%+v", js)
+			res = js.MustMap()
+		}
+	}
+	return
+}
+
+// GetTemplateList GET https://api.weixin.qq.com/wxa/gettemplatelist?access_token=ACCESS_TOKEN
+func (a *app) GetTemplateList(templateType int64) (res map[string]interface{}) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	payload, _ := json.Marshal(map[string]int64{
+		"template_type": templateType,
+	})
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/addtotemplate?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("GetTemplateList:%+v", js)
+			res = js.MustMap()
+		}
+	}
+	return
+}
+
+// DeleteTemplate POST https://api.weixin.qq.com/wxa/deletetemplate?access_token=ACCESS_TOKEN
+func (a *app) DeleteTemplate(templateId string) (res map[string]interface{}) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	payload, _ := json.Marshal(map[string]string{
+		"template_id": templateId,
+	})
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/deletetemplate?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("DeleteTemplate:%+v", js)
 			res = js.MustMap()
 		}
 	}
