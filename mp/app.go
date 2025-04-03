@@ -26,6 +26,8 @@ type App interface {
 	GetAccountBasicInfo() (res map[string]interface{})
 	GetVersionInfo() (res map[string]interface{})
 	GetPage() (res map[string]interface{})
+	GetQrcode(path string) []byte
+	Commit(templateId, extJson, userVersion, userDesc string) (err error)
 }
 
 type GetComponentAccessToken func() string
@@ -216,6 +218,42 @@ func (a *app) GetPage() (res map[string]interface{}) {
 			logger.Debugf("GetPage:%+v", js)
 			if js.Get("errcode").MustInt() == 0 {
 				res = js.MustMap()
+			}
+		}
+	}
+	return
+}
+
+// GetQrcode GET https://api.weixin.qq.com/wxa/get_qrcode?access_token=ACCESS_TOKEN
+func (a *app) GetQrcode(path string) []byte {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	params.Add("path", url.QueryEscape(path))
+	if response, err := http.Get(a.server + "/wxa/get_qrcode?" + params.Encode()); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			return resp
+		}
+	}
+	return nil
+}
+
+// Commit POST https://api.weixin.qq.com/wxa/commit?access_token=ACCESS_TOKEN
+func (a *app) Commit(templateId, extJson, userVersion, userDesc string) (err error) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	payload, _ := json.Marshal(map[string]interface{}{
+		"template_id":  templateId,
+		"ext_json":     extJson,
+		"user_version": userVersion,
+		"user_desc":    userDesc,
+	})
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/getversioninfo?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("Commit:%+v", js)
+			if js.Get("errcode").MustInt() != 0 {
+				err = errors.New(js.Get("errmsg").MustString())
 			}
 		}
 	}
