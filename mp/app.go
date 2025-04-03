@@ -23,6 +23,7 @@ type App interface {
 	JsCode2Session(jsCode string) map[string]interface{}
 	GetWxACodeUnLimit(page, scene string) []byte
 	PostWxaBusinessGetUserPhoneNumber(code string) (res map[string]interface{})
+	GetAccountBasicInfo() (res map[string]interface{})
 	GetVersionInfo() (res map[string]interface{})
 	GetPage() (res map[string]interface{})
 }
