@@ -43,7 +43,6 @@ type App interface {
 type GetComponentAccessToken func() string
 
 type Config struct {
-	Tenant            int64  `json:"tenant"`
 	Key               string `json:"key"`
 	AppId             string `json:"appid"`
 	Secret            string `json:"secret"`

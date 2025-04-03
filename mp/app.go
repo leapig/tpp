@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 )
 
 type App interface {
@@ -22,13 +23,19 @@ type App interface {
 	JsCode2Session(jsCode string) map[string]interface{}
 	GetWxACodeUnLimit(page, scene string) []byte
 	PostWxaBusinessGetUserPhoneNumber(code string) (res map[string]interface{})
+	GetVersionInfo() (res map[string]interface{})
+	GetPage() (res map[string]interface{})
 }
 
+type GetComponentAccessToken func() string
+
 type Config struct {
-	Key     string `json:"key"`
-	AppId   string `json:"appid"`
-	Secret  string `json:"secret"`
-	Version string `json:"version"`
+	Key               string `json:"key"`
+	AppId             string `json:"appid"`
+	Secret            string `json:"secret"`
+	Version           string `json:"version"`
+	ComponentAppid    string `json:"component_appid"`
+	GetComponentToken GetComponentAccessToken
 }
 
 type app struct {
@@ -46,16 +53,30 @@ func NewApp(config Config) App {
 			Id:    config.AppId + config.Secret,
 			Cache: file.New(os.TempDir()),
 			GetRefreshRequestFunc: func() (resp []byte) {
-				params := url.Values{}
-				params.Add("appid", config.AppId)
-				params.Add("secret", config.Secret)
-				params.Add("grant_type", "client_credential")
-				req, _ := http.NewRequest(http.MethodGet, server+"/cgi-bin/token?"+params.Encode(), nil)
-				response, _ := http.DefaultClient.Do(req)
-				resp, _ = io.ReadAll(response.Body)
+				if strings.HasPrefix(config.Secret, "refreshtoken@@@") {
+					params := url.Values{}
+					params.Add("component_access_token", config.GetComponentToken())
+					payload, _ := json.Marshal(map[string]string{
+						"component_appid":          config.ComponentAppid,
+						"authorizer_appid":         config.AppId,
+						"authorizer_refresh_token": config.Secret,
+					})
+					req, _ := http.NewRequest(http.MethodPost, server+"/cgi-bin/component/api_authorizer_token?"+params.Encode(), bytes.NewReader(payload))
+					response, _ := http.DefaultClient.Do(req)
+					resp, _ = io.ReadAll(response.Body)
+				} else {
+					params := url.Values{}
+					params.Add("appid", config.AppId)
+					params.Add("secret", config.Secret)
+					params.Add("grant_type", "client_credential")
+					req, _ := http.NewRequest(http.MethodGet, server+"/cgi-bin/token?"+params.Encode(), nil)
+					response, _ := http.DefaultClient.Do(req)
+					resp, _ = io.ReadAll(response.Body)
+				}
 				fmt.Printf("\n\n%s\n\n", string(resp))
 				return
-			}},
+			},
+		},
 	}
 }
 
@@ -74,19 +95,40 @@ func (a *app) Token() string {
 	return a.token.GetAccessToken()
 }
 
-// JsCode2Session GET https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code
+// JsCode2Session
+// GET https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code
+// GET https://api.weixin.qq.com/sns/component/jscode2session?appid=APPID&js_code=JSCODE&grant_type=authorization_code&component_appid=COMPONENT_APPID&component_access_token=COMPONENT_ACCESS_TOKEN
 func (a *app) JsCode2Session(jsCode string) (res map[string]interface{}) {
-	params := url.Values{}
-	params.Add("appid", a.config.AppId)
-	params.Add("secret", a.config.Secret)
-	params.Add("js_code", jsCode)
-	params.Add("grant_type", "authorization_code")
-	if response, err := http.Get(a.server + "/sns/jscode2session?" + params.Encode()); err == nil {
-		if resp, err := io.ReadAll(response.Body); err == nil {
-			js, _ := json2.NewJson(resp)
-			logger.Debugf("CardCodeDecrypt:%+v", js)
-			if js.Get("openid").MustString() != "" {
-				res = js.MustMap()
+
+	if strings.HasPrefix(a.config.Secret, "refreshtoken@@@") {
+		params := url.Values{}
+		params.Add("component_access_token", a.config.GetComponentToken())
+		params.Add("appid", a.config.AppId)
+		params.Add("grant_type", "client_credential")
+		params.Add("component_appid", a.config.ComponentAppid)
+		params.Add("js_code", jsCode)
+		if response, err := http.Get(a.server + "/sns/component/jscode2session?" + params.Encode()); err == nil {
+			if resp, err := io.ReadAll(response.Body); err == nil {
+				js, _ := json2.NewJson(resp)
+				logger.Debugf("JsCode2Session:%+v", js)
+				if js.Get("openid").MustString() != "" {
+					res = js.MustMap()
+				}
+			}
+		}
+	} else {
+		params := url.Values{}
+		params.Add("appid", a.config.AppId)
+		params.Add("secret", a.config.Secret)
+		params.Add("js_code", jsCode)
+		params.Add("grant_type", "authorization_code")
+		if response, err := http.Get(a.server + "/sns/jscode2session?" + params.Encode()); err == nil {
+			if resp, err := io.ReadAll(response.Body); err == nil {
+				js, _ := json2.NewJson(resp)
+				logger.Debugf("JsCode2Session:%+v", js)
+				if js.Get("openid").MustString() != "" {
+					res = js.MustMap()
+				}
 			}
 		}
 	}
@@ -123,12 +165,58 @@ func (a *app) PostWxaBusinessGetUserPhoneNumber(code string) (res map[string]int
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
-			logger.Debugf("CardCodeDecrypt:%+v", js)
+			logger.Debugf("PostWxaBusinessGetUserPhoneNumber:%+v", js)
 			if js.Get("errcode").MustInt() != 0 {
 				err = errors.New(js.Get("errmsg").MustString())
 			}
-			return js.Get("phone_info").MustMap()
+			res = js.Get("phone_info").MustMap()
 		}
 	}
-	return nil
+	return
+}
+
+// GetAccountBasicInfo POST https://api.weixin.qq.com/cgi-bin/account/getaccountbasicinfo?access_token=ACCESS_TOKEN
+func (a *app) GetAccountBasicInfo() (res map[string]interface{}) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/account/getaccountbasicinfo?"+params.Encode(), nil)
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("GetAccountBasicInfo:%+v", js)
+			res = js.MustMap()
+		}
+	}
+	return
+}
+
+// GetVersionInfo POST https://api.weixin.qq.com/wxa/getversioninfo?access_token=ACCESS_TOKEN
+func (a *app) GetVersionInfo() (res map[string]interface{}) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/getversioninfo?"+params.Encode(), nil)
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("GetAccountBasicInfo:%+v", js)
+			res = js.MustMap()
+		}
+	}
+	return
+}
+
+// GetPage GET https://api.weixin.qq.com/wxa/get_page?access_token=ACCESS_TOKEN
+func (a *app) GetPage() (res map[string]interface{}) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	if response, err := http.Get(a.server + "/wxa/get_page?" + params.Encode()); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("GetPage:%+v", js)
+			if js.Get("errcode").MustInt() == 0 {
+				res = js.MustMap()
+			}
+		}
+	}
+	return
 }
