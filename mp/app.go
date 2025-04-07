@@ -102,7 +102,6 @@ func (a *app) Token() string {
 // GET https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code
 // GET https://api.weixin.qq.com/sns/component/jscode2session?appid=APPID&js_code=JSCODE&grant_type=authorization_code&component_appid=COMPONENT_APPID&component_access_token=COMPONENT_ACCESS_TOKEN
 func (a *app) JsCode2Session(jsCode string) (res map[string]interface{}) {
-
 	if strings.HasPrefix(a.config.Secret, "refreshtoken@@@") {
 		params := url.Values{}
 		params.Add("component_access_token", a.config.GetComponentToken())
@@ -117,7 +116,11 @@ func (a *app) JsCode2Session(jsCode string) (res map[string]interface{}) {
 				if js.Get("openid").MustString() != "" {
 					res = js.MustMap()
 				}
+			} else {
+				logger.Errorf("JsCode2Session:%+v", err)
 			}
+		} else {
+			logger.Errorf("JsCode2Session:%+v", err)
 		}
 	} else {
 		params := url.Values{}
@@ -132,7 +135,11 @@ func (a *app) JsCode2Session(jsCode string) (res map[string]interface{}) {
 				if js.Get("openid").MustString() != "" {
 					res = js.MustMap()
 				}
+			} else {
+				logger.Errorf("JsCode2Session:%+v", err)
 			}
+		} else {
+			logger.Errorf("JsCode2Session:%+v", err)
 		}
 	}
 	return
@@ -152,7 +159,11 @@ func (a *app) GetWxACodeUnLimit(page, scene string) []byte {
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			return resp
+		} else {
+			logger.Errorf("GetWxACodeUnLimit:%+v", err)
 		}
+	} else {
+		logger.Errorf("GetWxACodeUnLimit:%+v", err)
 	}
 	return nil
 }
@@ -169,11 +180,14 @@ func (a *app) PostWxaBusinessGetUserPhoneNumber(code string) (res map[string]int
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("PostWxaBusinessGetUserPhoneNumber:%+v", js)
-			if js.Get("errcode").MustInt() != 0 {
-				err = errors.New(js.Get("errmsg").MustString())
+			if js.Get("errcode").MustInt() == 0 {
+				res = js.Get("phone_info").MustMap()
 			}
-			res = js.Get("phone_info").MustMap()
+		} else {
+			logger.Errorf("PostWxaBusinessGetUserPhoneNumber:%+v", err)
 		}
+	} else {
+		logger.Errorf("PostWxaBusinessGetUserPhoneNumber:%+v", err)
 	}
 	return
 }
@@ -188,7 +202,11 @@ func (a *app) GetAccountBasicInfo() (res map[string]interface{}) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("GetAccountBasicInfo:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("GetAccountBasicInfo:%+v", err)
 		}
+	} else {
+		logger.Errorf("GetAccountBasicInfo:%+v", err)
 	}
 	return
 }
@@ -201,9 +219,13 @@ func (a *app) GetVersionInfo() (res map[string]interface{}) {
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
-			logger.Debugf("GetAccountBasicInfo:%+v", js)
+			logger.Debugf("GetVersionInfo:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("GetVersionInfo:%+v", err)
 		}
+	} else {
+		logger.Errorf("GetVersionInfo:%+v", err)
 	}
 	return
 }
@@ -219,7 +241,11 @@ func (a *app) GetPage() (res map[string]interface{}) {
 			if js.Get("errcode").MustInt() == 0 {
 				res = js.MustMap()
 			}
+		} else {
+			logger.Errorf("GetPage:%+v", err)
 		}
+	} else {
+		logger.Errorf("GetPage:%+v", err)
 	}
 	return
 }
@@ -232,7 +258,11 @@ func (a *app) GetQrcode(path string) []byte {
 	if response, err := http.Get(a.server + "/wxa/get_qrcode?" + params.Encode()); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			return resp
+		} else {
+			logger.Errorf("GetQrcode:%+v", err)
 		}
+	} else {
+		logger.Errorf("GetQrcode:%+v", err)
 	}
 	return nil
 }
@@ -255,7 +285,11 @@ func (a *app) Commit(templateId, extJson, userVersion, userDesc string) (err err
 			if js.Get("errcode").MustInt() != 0 {
 				err = errors.New(js.Get("errmsg").MustString())
 			}
+		} else {
+			logger.Errorf("Commit:%+v", err)
 		}
+	} else {
+		logger.Errorf("Commit:%+v", err)
 	}
 	return
 }
