@@ -5,7 +5,6 @@ import (
 	"github.com/faabiosr/cachego"
 	"net/http"
 	"net/url"
-	"sync"
 	"time"
 )
 
@@ -19,16 +18,13 @@ type AccessToken struct {
 	GetRefreshRequestFunc getRefreshRequestFunc
 }
 
-var refreshAccessTokenLock sync.Mutex
-
 func (a AccessToken) GetAccessToken() (token string) {
-	refreshAccessTokenLock.Lock()
-	defer refreshAccessTokenLock.Unlock()
 	token, _ = a.Cache.Fetch("access_token:" + a.Id)
 	if token != "" {
 		return
 	}
 
+	// 刷新令牌
 	resp := a.GetRefreshRequestFunc()
 	var res struct {
 		AccessToken           string `json:"access_token"`
@@ -40,27 +36,29 @@ func (a AccessToken) GetAccessToken() (token string) {
 		Expire                int    `json:"expire"`
 	}
 	_ = json.Unmarshal(resp, &res)
+
 	if res.AccessToken != "" {
 		token = res.AccessToken
-		d := time.Duration(res.ExpiresIn) * time.Second
-		_ = a.Cache.Save("access_token:"+a.Id, token, d)
 	} else if res.ComponentAccessToken != "" {
 		token = res.ComponentAccessToken
-		d := time.Duration(res.ExpiresIn) * time.Second
-		_ = a.Cache.Save("access_token:"+a.Id, token, d)
 	} else if res.AuthorizerAccessToken != "" {
 		token = res.AuthorizerAccessToken
-		d := time.Duration(res.ExpiresIn) * time.Second
-		_ = a.Cache.Save("access_token:"+a.Id, token, d)
 	} else if res.AccessLarkToken != "" {
 		token = res.AccessLarkToken
-		d := time.Duration(res.Expire) * time.Second
-		_ = a.Cache.Save("access_token:"+a.Id, token, d)
 	} else if res.AccessDingToken != "" {
 		token = res.AccessDingToken
-		d := time.Duration(res.ExpiresIn) * time.Second
+	}
+
+	if token != "" {
+		var d time.Duration
+		if res.ExpiresIn > 0 {
+			d = time.Duration(res.ExpiresIn) * time.Second
+		} else if res.Expire > 0 {
+			d = time.Duration(res.Expire) * time.Second
+		}
 		_ = a.Cache.Save("access_token:"+a.Id, token, d)
 	}
+
 	return
 }
 
