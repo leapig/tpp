@@ -278,7 +278,7 @@ func (a *app) Commit(templateId, extJson, userVersion, userDesc string) (err err
 		"user_version": userVersion,
 		"user_desc":    userDesc,
 	})
-	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/getversioninfo?"+params.Encode(), bytes.NewReader(payload))
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/commit?"+params.Encode(), bytes.NewReader(payload))
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
