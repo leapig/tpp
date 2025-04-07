@@ -27,7 +27,7 @@ type App interface {
 	GetVersionInfo() (res map[string]interface{})
 	GetPage() (res map[string]interface{})
 	GetQrcode(path string) []byte
-	Commit(templateId, extJson, userVersion, userDesc string) (err error)
+	Commit(templateId int64, extJson, userVersion, userDesc string) (err error)
 }
 
 type GetComponentAccessToken func() string
@@ -269,7 +269,7 @@ func (a *app) GetQrcode(path string) []byte {
 }
 
 // Commit POST https://api.weixin.qq.com/wxa/commit?access_token=ACCESS_TOKEN
-func (a *app) Commit(templateId, extJson, userVersion, userDesc string) (err error) {
+func (a *app) Commit(templateId int64, extJson, userVersion, userDesc string) (err error) {
 	params := url.Values{}
 	params = a.token.ApplyAccessToken(params)
 	payload, _ := json.Marshal(map[string]interface{}{
@@ -278,6 +278,7 @@ func (a *app) Commit(templateId, extJson, userVersion, userDesc string) (err err
 		"user_version": userVersion,
 		"user_desc":    userDesc,
 	})
+	logger.Debugf("Commit:%+v", payload)
 	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/commit?"+params.Encode(), bytes.NewReader(payload))
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
