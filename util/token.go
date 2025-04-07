@@ -5,6 +5,7 @@ import (
 	"github.com/faabiosr/cachego"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 )
 
@@ -18,7 +19,20 @@ type AccessToken struct {
 	GetRefreshRequestFunc getRefreshRequestFunc
 }
 
+var refreshAccessTokenLock sync.Mutex
+
 func (a AccessToken) GetAccessToken() (token string) {
+	// 第一次检查缓存
+	token, _ = a.Cache.Fetch("access_token:" + a.Id)
+	if token != "" {
+		return
+	}
+
+	// 加锁
+	refreshAccessTokenLock.Lock()
+	defer refreshAccessTokenLock.Unlock()
+
+	// 第二次检查缓存（双重检查锁定）
 	token, _ = a.Cache.Fetch("access_token:" + a.Id)
 	if token != "" {
 		return

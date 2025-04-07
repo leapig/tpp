@@ -33,12 +33,12 @@ type App interface {
 type GetComponentAccessToken func() string
 
 type Config struct {
-	Key               string `json:"key"`
-	AppId             string `json:"appid"`
-	Secret            string `json:"secret"`
-	Version           string `json:"version"`
-	ComponentAppid    string `json:"component_appid"`
-	GetComponentToken GetComponentAccessToken
+	Key            string `json:"key"`
+	AppId          string `json:"appid"`
+	Secret         string `json:"secret"`
+	Version        string `json:"version"`
+	ComponentAppid string `json:"component_appid"`
+	ComponentToken string `json:"component_token"`
 }
 
 type app struct {
@@ -58,7 +58,7 @@ func NewApp(config Config) App {
 			GetRefreshRequestFunc: func() (resp []byte) {
 				if strings.HasPrefix(config.Secret, "refreshtoken@@@") {
 					params := url.Values{}
-					params.Add("component_access_token", config.GetComponentToken())
+					params.Add("component_access_token", config.ComponentToken)
 					payload, _ := json.Marshal(map[string]string{
 						"component_appid":          config.ComponentAppid,
 						"authorizer_appid":         config.AppId,
@@ -104,7 +104,7 @@ func (a *app) Token() string {
 func (a *app) JsCode2Session(jsCode string) (res map[string]interface{}) {
 	if strings.HasPrefix(a.config.Secret, "refreshtoken@@@") {
 		params := url.Values{}
-		params.Add("component_access_token", a.config.GetComponentToken())
+		params.Add("component_access_token", a.config.ComponentToken)
 		params.Add("appid", a.config.AppId)
 		params.Add("grant_type", "client_credential")
 		params.Add("component_appid", a.config.ComponentAppid)

@@ -43,13 +43,13 @@ type App interface {
 type GetComponentAccessToken func() string
 
 type Config struct {
-	Key               string `json:"key"`
-	AppId             string `json:"appid"`
-	Secret            string `json:"secret"`
-	Token             string `json:"token"`
-	AesKey            string `json:"aes_key"`
-	ComponentAppid    string `json:"component_appid"`
-	GetComponentToken GetComponentAccessToken
+	Key            string `json:"key"`
+	AppId          string `json:"appid"`
+	Secret         string `json:"secret"`
+	Token          string `json:"token"`
+	AesKey         string `json:"aes_key"`
+	ComponentAppid string `json:"component_appid"`
+	ComponentToken string `json:"component_token"`
 }
 
 type app struct {
@@ -70,7 +70,7 @@ func NewApp(config Config) App {
 			GetRefreshRequestFunc: func() (resp []byte) {
 				if strings.HasPrefix(config.Secret, "refreshtoken@@@") {
 					params := url.Values{}
-					params.Add("component_access_token", config.GetComponentToken())
+					params.Add("component_access_token", config.ComponentToken)
 					payload, _ := json.Marshal(map[string]string{
 						"component_appid":          config.ComponentAppid,
 						"authorizer_appid":         config.AppId,
@@ -353,7 +353,7 @@ func (a *app) AuthorizationCode(code string) (res map[string]interface{}) {
 	params.Add("grant_type", "authorization_code")
 	if strings.HasPrefix(a.config.Secret, "refreshtoken@@@") {
 		params.Add("component_appid", os.Getenv("WeChatAppId"))
-		params.Add("component_access_token", a.config.GetComponentToken())
+		params.Add("component_access_token", a.config.ComponentToken)
 		if response, err := http.Get(a.server + "/sns/oauth2/component/access_token?" + params.Encode()); err == nil {
 			if resp, err := io.ReadAll(response.Body); err == nil {
 				js, _ := json2.NewJson(resp)
