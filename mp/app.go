@@ -215,7 +215,8 @@ func (a *app) GetAccountBasicInfo() (res map[string]interface{}) {
 func (a *app) GetVersionInfo() (res map[string]interface{}) {
 	params := url.Values{}
 	params = a.token.ApplyAccessToken(params)
-	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/getversioninfo?"+params.Encode(), nil)
+	payload, _ := json.Marshal(map[string]interface{}{})
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/getversioninfo?"+params.Encode(), bytes.NewReader(payload))
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
