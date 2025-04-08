@@ -119,7 +119,11 @@ func (a *app) GetAccountBasicInfo() (res map[string]interface{}) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("GetAccountBasicInfo:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("GetAccountBasicInfo:%+v", err)
 		}
+	} else {
+		logger.Errorf("GetAccountBasicInfo:%+v", err)
 	}
 	return
 }
@@ -139,7 +143,11 @@ func (a *app) QrcodeCreate(scene string, limit bool) (res map[string]interface{}
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("QrcodeCreate:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("QrcodeCreate:%+v", err)
 		}
+	} else {
+		logger.Errorf("QrcodeCreate:%+v", err)
 	}
 	return
 }
@@ -153,7 +161,11 @@ func (a *app) TemplateGetAllPrivateTemplate() (res []interface{}) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("TemplateGetAllPrivateTemplate:%+v", js)
 			res = js.Get("template_list").MustArray()
+		} else {
+			logger.Errorf("TemplateGetAllPrivateTemplate:%+v", err)
 		}
+	} else {
+		logger.Errorf("TemplateGetAllPrivateTemplate:%+v", err)
 	}
 	return
 }
@@ -172,7 +184,11 @@ func (a *app) TemplateApiAddTemplate(templateIdShort int, keywordNameList []stri
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("TemplateApiAddTemplate:%+v", js)
 			templateId = js.Get("template_id").MustString()
+		} else {
+			logger.Errorf("TemplateApiAddTemplate:%+v", err)
 		}
+	} else {
+		logger.Errorf("TemplateApiAddTemplate:%+v", err)
 	}
 	return
 }
@@ -190,7 +206,11 @@ func (a *app) TemplateDelPrivateTemplate(templateId string) (res bool) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("TemplateDelPrivateTemplate:%+v", js)
 			res = js.Get("errcode").MustInt() == 0
+		} else {
+			logger.Errorf("TemplateDelPrivateTemplate:%+v", err)
 		}
+	} else {
+		logger.Errorf("TemplateDelPrivateTemplate:%+v", err)
 	}
 	return
 }
@@ -223,7 +243,11 @@ func (a *app) MessageTemplateSend(msg Message) (err error) {
 			if js.Get("errcode").MustInt() != 0 {
 				err = errors.New(js.Get("errmsg").MustString())
 			}
+		} else {
+			logger.Errorf("MessageTemplateSend:%+v", err)
 		}
+	} else {
+		logger.Errorf("MessageTemplateSend:%+v", err)
 	}
 	return
 }
@@ -240,7 +264,11 @@ func (a *app) UserGet(nextOpenid string) (res map[string]interface{}) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("UserGet:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("UserGet:%+v", err)
 		}
+	} else {
+		logger.Errorf("UserGet:%+v", err)
 	}
 	return
 }
@@ -255,7 +283,11 @@ func (a *app) UserInfo(openId string) (res map[string]interface{}) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("UserInfo:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("UserInfo:%+v", err)
 		}
+	} else {
+		logger.Errorf("UserInfo:%+v", err)
 	}
 	return
 }
@@ -269,7 +301,11 @@ func (a *app) GetCurrentSelfMenuInfo() (res map[string]interface{}) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("GetCurrentSelfMenuInfo:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("GetCurrentSelfMenuInfo:%+v", err)
 		}
+	} else {
+		logger.Errorf("GetCurrentSelfMenuInfo:%+v", err)
 	}
 	return
 }
@@ -304,7 +340,11 @@ func (a *app) MenuCreate(button []Button) error {
 			if js.Get("errcode").MustInt() != 0 {
 				return errors.New(js.Get("errmsg").MustString())
 			}
+		} else {
+			logger.Errorf("MenuCreate:%+v", err)
 		}
+	} else {
+		logger.Errorf("MenuCreate:%+v", err)
 	}
 	return nil
 }
@@ -318,7 +358,11 @@ func (a *app) MenuDelete() (res bool) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("MenuDelete:%+v", js)
 			res = js.Get("errcode").MustInt() == 0
+		} else {
+			logger.Errorf("MenuDelete:%+v", err)
 		}
+	} else {
+		logger.Errorf("MenuDelete:%+v", err)
 	}
 	return
 }
@@ -339,7 +383,11 @@ func (a *app) TicketGetTicket(ticketType string) (ticket string) {
 					d := time.Duration(js.Get("expires_in").MustInt()) * time.Second
 					_ = a.token.Cache.Save("ticket:"+a.token.Id, ticket, d)
 				}
+			} else {
+				logger.Errorf("TicketGetTicket:%+v", err)
 			}
+		} else {
+			logger.Errorf("TicketGetTicket:%+v", err)
 		}
 	}
 	return
@@ -352,7 +400,7 @@ func (a *app) AuthorizationCode(code string) (res map[string]interface{}) {
 	params.Add("code", code)
 	params.Add("grant_type", "authorization_code")
 	if strings.HasPrefix(a.config.Secret, "refreshtoken@@@") {
-		params.Add("component_appid", os.Getenv("WeChatAppId"))
+		params.Add("component_appid", a.config.ComponentAppid)
 		params.Add("component_access_token", a.config.ComponentToken)
 		if response, err := http.Get(a.server + "/sns/oauth2/component/access_token?" + params.Encode()); err == nil {
 			if resp, err := io.ReadAll(response.Body); err == nil {
@@ -361,7 +409,11 @@ func (a *app) AuthorizationCode(code string) (res map[string]interface{}) {
 				if js.Get("Openid") != nil {
 					res = js.MustMap()
 				}
+			} else {
+				logger.Errorf("AuthorizationCode:%+v", err)
 			}
+		} else {
+			logger.Errorf("AuthorizationCode:%+v", err)
 		}
 	} else {
 		params.Add("secret", a.config.Secret)
@@ -372,7 +424,11 @@ func (a *app) AuthorizationCode(code string) (res map[string]interface{}) {
 				if js.Get("Openid") != nil {
 					res = js.MustMap()
 				}
+			} else {
+				logger.Errorf("AuthorizationCode:%+v", err)
 			}
+		} else {
+			logger.Errorf("AuthorizationCode:%+v", err)
 		}
 	}
 	return
@@ -391,7 +447,11 @@ func (a *app) CardCodeDecrypt(encryptCode string) (code string) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("CardCodeDecrypt:%+v", js)
 			code = js.Get("code").MustString()
+		} else {
+			logger.Errorf("CardCodeDecrypt:%+v", err)
 		}
+	} else {
+		logger.Errorf("CardCodeDecrypt:%+v", err)
 	}
 	return
 }
