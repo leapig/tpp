@@ -28,6 +28,10 @@ type App interface {
 	GetPage() (res map[string]interface{})
 	GetQrcode(path string) []byte
 	Commit(templateId, extJson, userVersion, userDesc string) (err error)
+	OpenGet() (res map[string]interface{})
+	OpenBind(openAppid string) (err error)
+	OpenUnBind(openAppid string) (err error)
+	OpenCreate() (res map[string]interface{})
 }
 
 type GetComponentAccessToken func() string
@@ -278,12 +282,10 @@ func (a *app) Commit(templateId, extJson, userVersion, userDesc string) (err err
 		"user_version": userVersion,
 		"user_desc":    userDesc,
 	})
-	logger.Debugf("Commit:%+v", string(payload))
 	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/commit?"+params.Encode(), bytes.NewReader(payload))
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
-			logger.Debugf("Commit:%+v", js)
 			if js.Get("errcode").MustInt() != 0 {
 				err = errors.New(js.Get("errmsg").MustString())
 			}
@@ -292,6 +294,102 @@ func (a *app) Commit(templateId, extJson, userVersion, userDesc string) (err err
 		}
 	} else {
 		logger.Errorf("Commit:%+v", err)
+	}
+	return
+}
+
+// OpenGet POST https://api.weixin.qq.com/cgi-bin/open/get?access_token=ACCESS_TOKEN
+func (a *app) OpenGet() (res map[string]interface{}) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	payload, _ := json.Marshal(map[string]interface{}{
+		"appid": a.config.AppId,
+	})
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/open/get?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("OpenGet:%+v", js)
+			if js.Get("errcode").MustInt() != 0 {
+				err = errors.New(js.Get("errmsg").MustString())
+			}
+		} else {
+			logger.Errorf("OpenGet:%+v", err)
+		}
+	} else {
+		logger.Errorf("OpenGet:%+v", err)
+	}
+	return
+}
+
+// OpenBind POST https://api.weixin.qq.com/cgi-bin/open/bind?access_token=ACCESS_TOKEN
+func (a *app) OpenBind(openAppid string) (err error) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	payload, _ := json.Marshal(map[string]interface{}{
+		"appid":      a.config.AppId,
+		"open_appid": openAppid,
+	})
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/open/bind?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("OpenBind:%+v", js)
+			if js.Get("errcode").MustInt() != 0 {
+				err = errors.New(js.Get("errmsg").MustString())
+			}
+		} else {
+			logger.Errorf("OpenBind:%+v", err)
+		}
+	} else {
+		logger.Errorf("OpenBind:%+v", err)
+	}
+	return
+}
+
+// OpenUnBind POST https://api.weixin.qq.com/cgi-bin/open/unbind?access_token=ACCESS_TOKEN
+func (a *app) OpenUnBind(openAppid string) (err error) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	payload, _ := json.Marshal(map[string]interface{}{
+		"appid":      a.config.AppId,
+		"open_appid": openAppid,
+	})
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/open/unbind?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("OpenUnBind:%+v", js)
+			if js.Get("errcode").MustInt() != 0 {
+				err = errors.New(js.Get("errmsg").MustString())
+			}
+		} else {
+			logger.Errorf("OpenUnBind:%+v", err)
+		}
+	} else {
+		logger.Errorf("OpenUnBind:%+v", err)
+	}
+	return
+}
+
+// OpenCreate POST https://api.weixin.qq.com/cgi-bin/open/create?access_token=ACCESS_TOKEN
+func (a *app) OpenCreate() (res map[string]interface{}) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	payload, _ := json.Marshal(map[string]interface{}{
+		"appid": a.config.AppId,
+	})
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/open/create?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("OpenCreate:%+v", js)
+			res = js.MustMap()
+		} else {
+			logger.Errorf("OpenCreate:%+v", err)
+		}
+	} else {
+		logger.Errorf("OpenCreate:%+v", err)
 	}
 	return
 }
