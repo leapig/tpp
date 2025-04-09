@@ -38,7 +38,7 @@ type App interface {
 	TicketGetTicket(ticketType string) (ticket string)
 	AuthorizationCode(code string) (res map[string]interface{})
 	CardCodeDecrypt(encryptCode string) (code string)
-	OpenGet() (res map[string]interface{})
+	OpenGet() (res string)
 	OpenBind(openAppid string) (err error)
 	OpenUnBind(openAppid string) (err error)
 	OpenCreate() (res map[string]interface{})
@@ -461,7 +461,7 @@ func (a *app) CardCodeDecrypt(encryptCode string) (code string) {
 }
 
 // OpenGet POST https://api.weixin.qq.com/cgi-bin/open/get?access_token=ACCESS_TOKEN
-func (a *app) OpenGet() (res map[string]interface{}) {
+func (a *app) OpenGet() (res string) {
 	params := url.Values{}
 	params = a.token.ApplyAccessToken(params)
 	payload, _ := json.Marshal(map[string]interface{}{
@@ -472,8 +472,8 @@ func (a *app) OpenGet() (res map[string]interface{}) {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("OpenGet:%+v", js)
-			if js.Get("errcode").MustInt() != 0 {
-				err = errors.New(js.Get("errmsg").MustString())
+			if js.Get("errcode").MustInt() == 0 {
+				res = js.Get("open_appid").MustString()
 			}
 		} else {
 			logger.Errorf("OpenGet:%+v", err)
