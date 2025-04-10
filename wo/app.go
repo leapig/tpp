@@ -20,7 +20,7 @@ type App interface {
 	Token() string
 	ApiCreatePreAuthCode() (res map[string]interface{})
 	ApiQueryAuth(authorizationCode string) (res map[string]interface{})
-	ApiGetAuthorizerList() (res []map[string]interface{})
+	ApiGetAuthorizerList() (res []interface{})
 	ApiGetAuthorizerInfo(appId string) (res map[string]interface{})
 	GetTemplateDraftList() (res map[string]interface{})
 	AddToTemplate(draftId, templateType int64) (res map[string]interface{})
@@ -115,16 +115,16 @@ func (a *app) ApiQueryAuth(authorizationCode string) (res map[string]interface{}
 }
 
 // ApiGetAuthorizerList POST https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_list?access_token=ACCESS_TOKEN
-func (a *app) ApiGetAuthorizerList() (res []map[string]interface{}) {
+func (a *app) ApiGetAuthorizerList() (res []interface{}) {
 	offset := 0
 	for {
 		resp := a.apiGetAuthorizerList(offset * 500)
 		total, _ := resp["total_count"].(json.Number).Int64()
 		if total >= int64((offset+1)*500) {
-			res = append(res, resp["list"].([]map[string]interface{})...)
+			res = append(res, resp["list"].([]interface{})...)
 			break
 		} else {
-			res = append(res, resp["list"].([]map[string]interface{})...)
+			res = append(res, resp["list"].([]interface{})...)
 			offset++
 		}
 	}

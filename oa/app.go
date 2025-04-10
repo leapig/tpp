@@ -258,10 +258,10 @@ func (a *app) MessageTemplateSend(msg Message) (err error) {
 
 func (a *app) UserGet() (res []interface{}) {
 	resp := a.userGet("")
-	total := resp["total"]
+	total, _ := resp["total"].(json.Number).Int64()
 	res = append(res, resp["data"].(map[string]interface{})["openid"].([]interface{})...)
 	for {
-		if total.(int) == len(res) {
+		if int(total) == len(res) {
 			break
 		}
 		resp = a.userGet(resp["data"].(map[string]interface{})["next_openid"].(string))
