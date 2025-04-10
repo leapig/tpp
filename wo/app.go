@@ -26,9 +26,9 @@ type App interface {
 	AddToTemplate(draftId, templateType int64) (res map[string]interface{})
 	GetTemplateList(templateType int64) (res map[string]interface{})
 	DeleteTemplate(templateId int64) (res map[string]interface{})
-	ModifyWxaServerDomain(action string, WxaServerDomain, IsModifyPublishedTogether bool) (res map[string]interface{}, err error)
+	ModifyWxaServerDomain(action, WxaServerDomain string, IsModifyPublishedTogether bool) (res map[string]interface{}, err error)
 	GetDomainConfirmFile() (res map[string]interface{}, err error)
-	ModifyWxaJumpDomain(action string, WxaJumpH5Domain, IsModifyPublishedTogether bool) (res map[string]interface{}, err error)
+	ModifyWxaJumpDomain(action, WxaJumpH5Domain string, IsModifyPublishedTogether bool) (res map[string]interface{}, err error)
 }
 
 type Config struct {
@@ -238,7 +238,7 @@ func (a *app) DeleteTemplate(templateId int64) (res map[string]interface{}) {
 }
 
 // ModifyWxaServerDomain POST https://api.weixin.qq.com/cgi-bin/component/modify_wxa_server_domain?access_token=ACCESS_TOKEN
-func (a *app) ModifyWxaServerDomain(action string, WxaServerDomain, IsModifyPublishedTogether bool) (res map[string]interface{}, err error) {
+func (a *app) ModifyWxaServerDomain(action, WxaServerDomain string, IsModifyPublishedTogether bool) (res map[string]interface{}, err error) {
 	params := url.Values{}
 	params = a.token.ApplyAccessToken(params)
 	payload, _ := json.Marshal(map[string]interface{}{
@@ -281,7 +281,7 @@ func (a *app) GetDomainConfirmFile() (res map[string]interface{}, err error) {
 }
 
 // ModifyWxaJumpDomain POST https://api.weixin.qq.com/cgi-bin/component/modify_wxa_jump_domain?access_token=ACCESS_TOKEN
-func (a *app) ModifyWxaJumpDomain(action string, WxaJumpH5Domain, IsModifyPublishedTogether bool) (res map[string]interface{}, err error) {
+func (a *app) ModifyWxaJumpDomain(action, WxaJumpH5Domain string, IsModifyPublishedTogether bool) (res map[string]interface{}, err error) {
 	params := url.Values{}
 	params = a.token.ApplyAccessToken(params)
 	payload, _ := json.Marshal(map[string]interface{}{
