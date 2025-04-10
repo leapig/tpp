@@ -3,6 +3,7 @@ package wo
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	json2 "github.com/bitly/go-simplejson"
 	"github.com/faabiosr/cachego/file"
@@ -25,6 +26,9 @@ type App interface {
 	AddToTemplate(draftId, templateType int64) (res map[string]interface{})
 	GetTemplateList(templateType int64) (res map[string]interface{})
 	DeleteTemplate(templateId int64) (res map[string]interface{})
+	ModifyWxaServerDomain(action string, WxaServerDomain, IsModifyPublishedTogether bool) (res map[string]interface{}, err error)
+	GetDomainConfirmFile() (res map[string]interface{}, err error)
+	ModifyWxaJumpDomain(action string, WxaJumpH5Domain, IsModifyPublishedTogether bool) (res map[string]interface{}, err error)
 }
 
 type Config struct {
@@ -228,6 +232,73 @@ func (a *app) DeleteTemplate(templateId int64) (res map[string]interface{}) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("DeleteTemplate:%+v", js)
 			res = js.MustMap()
+		}
+	}
+	return
+}
+
+// ModifyWxaServerDomain POST https://api.weixin.qq.com/cgi-bin/component/modify_wxa_server_domain?access_token=ACCESS_TOKEN
+func (a *app) ModifyWxaServerDomain(action string, WxaServerDomain, IsModifyPublishedTogether bool) (res map[string]interface{}, err error) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	payload, _ := json.Marshal(map[string]interface{}{
+		"action":                       action,
+		"wxa_server_domain":            WxaServerDomain,
+		"is_modify_published_together": IsModifyPublishedTogether,
+	})
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/modify_wxa_server_domain?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("ModifyWxaServerDomain:%+v", js)
+			if js.Get("errcode").MustInt() != 0 {
+				err = errors.New(js.Get("errmsg").MustString())
+			} else {
+				res = js.MustMap()
+			}
+		}
+	}
+	return
+}
+
+// GetDomainConfirmFile POST https://api.weixin.qq.com/cgi-bin/component/get_domain_confirmfile?access_token=ACCESS_TOKEN
+func (a *app) GetDomainConfirmFile() (res map[string]interface{}, err error) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/get_domain_confirmfile?"+params.Encode(), nil)
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("GetDomainConfirmFile:%+v", js)
+			if js.Get("errcode").MustInt() != 0 {
+				err = errors.New(js.Get("errmsg").MustString())
+			} else {
+				res = js.MustMap()
+			}
+		}
+	}
+	return
+}
+
+// ModifyWxaJumpDomain POST https://api.weixin.qq.com/cgi-bin/component/modify_wxa_jump_domain?access_token=ACCESS_TOKEN
+func (a *app) ModifyWxaJumpDomain(action string, WxaJumpH5Domain, IsModifyPublishedTogether bool) (res map[string]interface{}, err error) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	payload, _ := json.Marshal(map[string]interface{}{
+		"action":                       action,
+		"wxa_jump_h5_domain":           WxaJumpH5Domain,
+		"is_modify_published_together": IsModifyPublishedTogether,
+	})
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/modify_wxa_jump_domain?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("ModifyWxaJumpDomain:%+v", js)
+			if js.Get("errcode").MustInt() != 0 {
+				err = errors.New(js.Get("errmsg").MustString())
+			} else {
+				res = js.MustMap()
+			}
 		}
 	}
 	return
