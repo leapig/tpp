@@ -30,7 +30,7 @@ type App interface {
 	TemplateApiAddTemplate(templateIdShort int, keywordNameList []string) (templateId string)
 	TemplateDelPrivateTemplate(templateId string) (res bool)
 	MessageTemplateSend(msg Message) error
-	UserGet(nextOpenid string) (res map[string]interface{})
+	UserGet() (res []string)
 	UserInfo(openId string) (res map[string]interface{})
 	GetCurrentSelfMenuInfo() (res map[string]interface{})
 	MenuCreate(button []Button) (err error)
@@ -256,8 +256,22 @@ func (a *app) MessageTemplateSend(msg Message) (err error) {
 	return
 }
 
+func (a *app) UserGet() (res []string) {
+	resp := a.userGet("")
+	total := resp["total"]
+	res = append(res, resp["data"].(map[string]interface{})["openid"].([]string)...)
+	for {
+		if total.(int) == len(res) {
+			break
+		}
+		resp = a.userGet(resp["data"].(map[string]interface{})["next_openid"].(string))
+		res = append(res, resp["data"].(map[string]interface{})["openid"].([]string)...)
+	}
+	return
+}
+
 // UserGet GET https://api.weixin.qq.com/cgi-bin/user/get?access_token=ACCESS_TOKEN&next_openid=NEXT_OPENID
-func (a *app) UserGet(nextOpenid string) (res map[string]interface{}) {
+func (a *app) userGet(nextOpenid string) (res map[string]interface{}) {
 	params := url.Values{}
 	if nextOpenid != "" {
 		params.Add("next_openid", nextOpenid)
