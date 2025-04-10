@@ -118,7 +118,9 @@ func (a *app) ApiQueryAuth(authorizationCode string) (res map[string]interface{}
 func (a *app) ApiGetAuthorizerList() (res []map[string]interface{}) {
 	offset := 0
 	for {
-		if resp := a.apiGetAuthorizerList(offset * 500); resp["total_count"].(int) >= ((offset + 1) * 500) {
+		resp := a.apiGetAuthorizerList(offset * 500)
+		total, _ := resp["total_count"].(json.Number).Int64()
+		if total >= int64((offset+1)*500) {
 			res = append(res, resp["list"].([]map[string]interface{})...)
 			break
 		} else {
