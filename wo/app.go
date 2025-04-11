@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 )
 
 type App interface {
@@ -90,7 +91,11 @@ func (a *app) ApiCreatePreAuthCode() (res map[string]interface{}) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("ApiCreatePreAuthCode:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("ApiCreatePreAuthCode:%+v", err)
 		}
+	} else {
+		logger.Errorf("ApiCreatePreAuthCode:%+v", err)
 	}
 	return
 }
@@ -107,28 +112,35 @@ func (a *app) ApiQueryAuth(authorizationCode string) (res map[string]interface{}
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
-			logger.Debugf("apiGetAuthorizerList:%+v", js)
+			logger.Debugf("ApiQueryAuth:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("ApiQueryAuth:%+v", err)
 		}
+	} else {
+		logger.Errorf("ApiQueryAuth:%+v", err)
 	}
 	return
 }
 
+const (
+	batchSize = 500
+)
+
 // ApiGetAuthorizerList POST https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_list?access_token=ACCESS_TOKEN
+
 func (a *app) ApiGetAuthorizerList() (res []interface{}) {
 	offset := 0
 	for {
-		resp := a.apiGetAuthorizerList(offset * 500)
+		resp := a.apiGetAuthorizerList(offset * batchSize)
 		total, _ := resp["total_count"].(json.Number).Int64()
-		if total >= int64((offset+1)*500) {
-			res = append(res, resp["list"].([]interface{})...)
+		res = append(res, resp["list"].([]interface{})...)
+		if total <= int64((offset+1)*batchSize) {
 			break
-		} else {
-			res = append(res, resp["list"].([]interface{})...)
-			offset++
 		}
+		offset++
 	}
-	return res
+	return
 }
 
 func (a *app) apiGetAuthorizerList(offset int) (res map[string]interface{}) {
@@ -137,7 +149,7 @@ func (a *app) apiGetAuthorizerList(offset int) (res map[string]interface{}) {
 	payload, _ := json.Marshal(map[string]interface{}{
 		"component_appid": a.config.AppId,
 		"offset":          offset,
-		"count":           500,
+		"count":           batchSize,
 	})
 	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_get_authorizer_list?"+params.Encode(), bytes.NewReader(payload))
 	if response, err := http.DefaultClient.Do(req); err == nil {
@@ -145,7 +157,11 @@ func (a *app) apiGetAuthorizerList(offset int) (res map[string]interface{}) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("apiGetAuthorizerList:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("apiGetAuthorizerList:%+v", err)
 		}
+	} else {
+		logger.Errorf("apiGetAuthorizerList:%+v", err)
 	}
 	return
 }
@@ -164,7 +180,11 @@ func (a *app) ApiGetAuthorizerInfo(authorizerAppId string) (res map[string]inter
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("ApiGetAuthorizerInfo:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("ApiGetAuthorizerInfo:%+v", err)
 		}
+	} else {
+		logger.Errorf("ApiGetAuthorizerInfo:%+v", err)
 	}
 	return
 }
@@ -179,7 +199,11 @@ func (a *app) GetTemplateDraftList() (res map[string]interface{}) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("GetTemplateDraftList:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("GetTemplateDraftList:%+v", err)
 		}
+	} else {
+		logger.Errorf("GetTemplateDraftList:%+v", err)
 	}
 	return
 }
@@ -198,7 +222,11 @@ func (a *app) AddToTemplate(draftId, templateType int64) (res map[string]interfa
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("AddToTemplate:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("AddToTemplate:%+v", err)
 		}
+	} else {
+		logger.Errorf("AddToTemplate:%+v", err)
 	}
 	return
 }
@@ -216,7 +244,11 @@ func (a *app) GetTemplateList(templateType int64) (res map[string]interface{}) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("GetTemplateList:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("GetTemplateList:%+v", err)
 		}
+	} else {
+		logger.Errorf("GetTemplateList:%+v", err)
 	}
 	return
 }
@@ -234,7 +266,11 @@ func (a *app) DeleteTemplate(templateId int64) (res map[string]interface{}) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("DeleteTemplate:%+v", js)
 			res = js.MustMap()
+		} else {
+			logger.Errorf("DeleteTemplate:%+v", err)
 		}
+	} else {
+		logger.Errorf("DeleteTemplate:%+v", err)
 	}
 	return
 }
@@ -243,11 +279,19 @@ func (a *app) DeleteTemplate(templateId int64) (res map[string]interface{}) {
 func (a *app) ModifyWxaServerDomain(action, WxaServerDomain string, IsModifyPublishedTogether bool) (res map[string]interface{}, err error) {
 	params := url.Values{}
 	params = a.token.ApplyAccessToken(params)
-	payload, _ := json.Marshal(map[string]interface{}{
-		"action":                       action,
-		"wxa_server_domain":            WxaServerDomain,
-		"is_modify_published_together": IsModifyPublishedTogether,
-	})
+	var body map[string]interface{}
+	if strings.ToLower(action) != "get" {
+		body = map[string]interface{}{
+			"action":                       action,
+			"wxa_server_domain":            WxaServerDomain,
+			"is_modify_published_together": IsModifyPublishedTogether,
+		}
+	} else {
+		body = map[string]interface{}{
+			"action": action,
+		}
+	}
+	payload, _ := json.Marshal(body)
 	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/modify_wxa_server_domain?"+params.Encode(), bytes.NewReader(payload))
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
@@ -258,7 +302,11 @@ func (a *app) ModifyWxaServerDomain(action, WxaServerDomain string, IsModifyPubl
 			} else {
 				res = js.MustMap()
 			}
+		} else {
+			logger.Errorf("ModifyWxaServerDomain:%+v", err)
 		}
+	} else {
+		logger.Errorf("ModifyWxaServerDomain:%+v", err)
 	}
 	return
 }
@@ -277,7 +325,11 @@ func (a *app) GetDomainConfirmFile() (res map[string]interface{}, err error) {
 			} else {
 				res = js.MustMap()
 			}
+		} else {
+			logger.Errorf("GetDomainConfirmFile:%+v", err)
 		}
+	} else {
+		logger.Errorf("GetDomainConfirmFile:%+v", err)
 	}
 	return
 }
@@ -286,11 +338,19 @@ func (a *app) GetDomainConfirmFile() (res map[string]interface{}, err error) {
 func (a *app) ModifyWxaJumpDomain(action, WxaJumpH5Domain string, IsModifyPublishedTogether bool) (res map[string]interface{}, err error) {
 	params := url.Values{}
 	params = a.token.ApplyAccessToken(params)
-	payload, _ := json.Marshal(map[string]interface{}{
-		"action":                       action,
-		"wxa_jump_h5_domain":           WxaJumpH5Domain,
-		"is_modify_published_together": IsModifyPublishedTogether,
-	})
+	var body map[string]interface{}
+	if strings.ToLower(action) != "get" {
+		body = map[string]interface{}{
+			"action":                       action,
+			"wxa_jump_h5_domain":           WxaJumpH5Domain,
+			"is_modify_published_together": IsModifyPublishedTogether,
+		}
+	} else {
+		body = map[string]interface{}{
+			"action": action,
+		}
+	}
+	payload, _ := json.Marshal(body)
 	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/modify_wxa_jump_domain?"+params.Encode(), bytes.NewReader(payload))
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
@@ -301,7 +361,11 @@ func (a *app) ModifyWxaJumpDomain(action, WxaJumpH5Domain string, IsModifyPublis
 			} else {
 				res = js.MustMap()
 			}
+		} else {
+			logger.Errorf("ModifyWxaJumpDomain:%+v", err)
 		}
+	} else {
+		logger.Errorf("ModifyWxaJumpDomain:%+v", err)
 	}
 	return
 }

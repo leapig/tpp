@@ -264,7 +264,7 @@ func (a *app) UserGet() (res []interface{}) {
 		if int(total) == len(res) {
 			break
 		}
-		resp = a.userGet(resp["data"].(map[string]interface{})["next_openid"].(string))
+		resp = a.userGet(resp["next_openid"].(string))
 		res = append(res, resp["data"].(map[string]interface{})["openid"].([]interface{})...)
 	}
 	return

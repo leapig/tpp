@@ -32,6 +32,8 @@ type App interface {
 	OpenBind(openAppid string) (err error)
 	OpenUnBind(openAppid string) (err error)
 	OpenCreate() (res map[string]interface{})
+	ModifyDomain(action string, requestDomain, wsRequestDomain, uploadDomain, downloadDomain, udpDomain, tcpDomain []string) (res map[string]interface{}, err error)
+	SetWebViewDomain(action string, webviewDomain []string) (res map[string]interface{}, err error)
 }
 
 type GetComponentAccessToken func() string
@@ -390,6 +392,81 @@ func (a *app) OpenCreate() (res map[string]interface{}) {
 		}
 	} else {
 		logger.Errorf("OpenCreate:%+v", err)
+	}
+	return
+}
+
+// ModifyDomain POST https://api.weixin.qq.com/wxa/modify_domain?access_token=ACCESS_TOKEN
+func (a *app) ModifyDomain(action string, requestDomain, wsRequestDomain, uploadDomain, downloadDomain, udpDomain, tcpDomain []string) (res map[string]interface{}, err error) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	var body map[string]interface{}
+	if strings.ToLower(action) != "get" {
+		body = map[string]interface{}{
+			"action":          action,
+			"requestdomain":   requestDomain,
+			"wsrequestdomain": wsRequestDomain,
+			"uploaddomain":    uploadDomain,
+			"downloaddomain":  downloadDomain,
+			"udpdomain":       udpDomain,
+			"tcpdomain":       tcpDomain,
+		}
+	} else {
+		body = map[string]interface{}{
+			"action": action,
+		}
+	}
+	payload, _ := json.Marshal(body)
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/modify_domain?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("ModifyDomain:%+v", js)
+			if js.Get("errcode").MustInt() != 0 {
+				err = errors.New(js.Get("errmsg").MustString())
+			} else {
+				res = js.MustMap()
+			}
+		} else {
+			logger.Errorf("ModifyDomain:%+v", err)
+		}
+	} else {
+		logger.Errorf("ModifyDomain:%+v", err)
+	}
+	return
+}
+
+// SetWebViewDomain POST https://api.weixin.qq.com/wxa/setwebviewdomain?access_token=ACCESS_TOKEN
+func (a *app) SetWebViewDomain(action string, webviewDomain []string) (res map[string]interface{}, err error) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	var body map[string]interface{}
+	if strings.ToLower(action) != "get" {
+		body = map[string]interface{}{
+			"action":        action,
+			"webviewdomain": webviewDomain,
+		}
+	} else {
+		body = map[string]interface{}{
+			"action": action,
+		}
+	}
+	payload, _ := json.Marshal(body)
+	req, _ := http.NewRequest(http.MethodPost, a.server+"/wxa/setwebviewdomain?"+params.Encode(), bytes.NewReader(payload))
+	if response, err := http.DefaultClient.Do(req); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			js, _ := json2.NewJson(resp)
+			logger.Debugf("SetWebViewDomain:%+v", js)
+			if js.Get("errcode").MustInt() != 0 {
+				err = errors.New(js.Get("errmsg").MustString())
+			} else {
+				res = js.MustMap()
+			}
+		} else {
+			logger.Errorf("SetWebViewDomain:%+v", err)
+		}
+	} else {
+		logger.Errorf("SetWebViewDomain:%+v", err)
 	}
 	return
 }
