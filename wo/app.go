@@ -30,6 +30,12 @@ type App interface {
 	ModifyWxaServerDomain(action, WxaServerDomain string, IsModifyPublishedTogether bool) (res map[string]interface{}, err error)
 	GetDomainConfirmFile() (res map[string]interface{}, err error)
 	ModifyWxaJumpDomain(action, WxaJumpH5Domain string, IsModifyPublishedTogether bool) (res map[string]interface{}, err error)
+	// V2版本
+	StartPushTicket() (js *json2.Json, err error)
+	GetPreAuthCode() (js *json2.Json, err error)
+	GetAuthorizerAccessToken(authorizerAppId, authorizerRefreshToken string) (js *json2.Json, err error)
+	GetAuthorizerRefreshToken(authorizationCode string) (js *json2.Json, err error)
+	GetComponentAccessToken() (js *json2.Json, err error)
 }
 
 type Config struct {
