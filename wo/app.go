@@ -19,10 +19,6 @@ import (
 type App interface {
 	Id() string
 	Token() string
-	ApiCreatePreAuthCode() (res map[string]interface{})
-	ApiQueryAuth(authorizationCode string) (res map[string]interface{})
-	ApiGetAuthorizerList() (res []interface{})
-	ApiGetAuthorizerInfo(appId string) (res map[string]interface{})
 	GetTemplateDraftList() (res map[string]interface{})
 	AddToTemplate(draftId, templateType int64) (res map[string]interface{})
 	GetTemplateList(templateType int64) (res map[string]interface{})
@@ -30,12 +26,23 @@ type App interface {
 	ModifyWxaServerDomain(action, WxaServerDomain string, IsModifyPublishedTogether bool) (res map[string]interface{}, err error)
 	GetDomainConfirmFile() (res map[string]interface{}, err error)
 	ModifyWxaJumpDomain(action, WxaJumpH5Domain string, IsModifyPublishedTogether bool) (res map[string]interface{}, err error)
-	// V2版本
+
+	/* ticket-token */
+
 	StartPushTicket() (js *json2.Json, err error)
 	GetPreAuthCode() (js *json2.Json, err error)
 	GetAuthorizerAccessToken(authorizerAppId, authorizerRefreshToken string) (js *json2.Json, err error)
 	GetAuthorizerRefreshToken(authorizationCode string) (js *json2.Json, err error)
 	GetComponentAccessToken() (js *json2.Json, err error)
+	/* ticket-token */
+	/* authorization-management */
+
+	GetAuthorizerList() (js []*json2.Json, err error)
+	GetAuthorizerInfo(authorizerAppId string) (js *json2.Json, err error)
+	SetAuthorizerOptionInfo(authorizerAccessToken, optionName, optionValue string) (js *json2.Json, err error)
+	GetAuthorizerOptionInfo(authorizerAccessToken, optionName string) (js *json2.Json, err error)
+	/* authorization-management */
+
 }
 
 type Config struct {
@@ -82,117 +89,6 @@ func (a *app) Id() string {
 
 func (a *app) Token() string {
 	return a.token.GetAccessToken()
-}
-
-// ApiCreatePreAuthCode POST https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode?access_token=ACCESS_TOKEN
-func (a *app) ApiCreatePreAuthCode() (res map[string]interface{}) {
-	params := url.Values{}
-	params = a.token.ApplyAccessToken(params)
-	payload, _ := json.Marshal(map[string]interface{}{
-		"component_appid": a.config.AppId,
-	})
-	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_create_preauthcode?"+params.Encode(), bytes.NewReader(payload))
-	if response, err := http.DefaultClient.Do(req); err == nil {
-		if resp, err := io.ReadAll(response.Body); err == nil {
-			js, _ := json2.NewJson(resp)
-			logger.Debugf("ApiCreatePreAuthCode:%+v", js)
-			res = js.MustMap()
-		} else {
-			logger.Errorf("ApiCreatePreAuthCode:%+v", err)
-		}
-	} else {
-		logger.Errorf("ApiCreatePreAuthCode:%+v", err)
-	}
-	return
-}
-
-// ApiQueryAuth POST https://api.weixin.qq.com/cgi-bin/component/api_query_auth?component_access_token=COMPONENT_ACCESS_TOKEN
-func (a *app) ApiQueryAuth(authorizationCode string) (res map[string]interface{}) {
-	params := url.Values{}
-	params.Add("component_access_token", a.Token())
-	payload, _ := json.Marshal(map[string]interface{}{
-		"component_appid":    a.config.AppId,
-		"authorization_code": authorizationCode,
-	})
-	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_query_auth?"+params.Encode(), bytes.NewReader(payload))
-	if response, err := http.DefaultClient.Do(req); err == nil {
-		if resp, err := io.ReadAll(response.Body); err == nil {
-			js, _ := json2.NewJson(resp)
-			logger.Debugf("ApiQueryAuth:%+v", js)
-			res = js.MustMap()
-		} else {
-			logger.Errorf("ApiQueryAuth:%+v", err)
-		}
-	} else {
-		logger.Errorf("ApiQueryAuth:%+v", err)
-	}
-	return
-}
-
-const (
-	batchSize = 500
-)
-
-// ApiGetAuthorizerList POST https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_list?access_token=ACCESS_TOKEN
-
-func (a *app) ApiGetAuthorizerList() (res []interface{}) {
-	offset := 0
-	for {
-		resp := a.apiGetAuthorizerList(offset * batchSize)
-		total, _ := resp["total_count"].(json.Number).Int64()
-		res = append(res, resp["list"].([]interface{})...)
-		if total <= int64((offset+1)*batchSize) {
-			break
-		}
-		offset++
-	}
-	return
-}
-
-func (a *app) apiGetAuthorizerList(offset int) (res map[string]interface{}) {
-	params := url.Values{}
-	params = a.token.ApplyAccessToken(params)
-	payload, _ := json.Marshal(map[string]interface{}{
-		"component_appid": a.config.AppId,
-		"offset":          offset,
-		"count":           batchSize,
-	})
-	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_get_authorizer_list?"+params.Encode(), bytes.NewReader(payload))
-	if response, err := http.DefaultClient.Do(req); err == nil {
-		if resp, err := io.ReadAll(response.Body); err == nil {
-			js, _ := json2.NewJson(resp)
-			logger.Debugf("apiGetAuthorizerList:%+v", js)
-			res = js.MustMap()
-		} else {
-			logger.Errorf("apiGetAuthorizerList:%+v", err)
-		}
-	} else {
-		logger.Errorf("apiGetAuthorizerList:%+v", err)
-	}
-	return
-}
-
-// ApiGetAuthorizerInfo POST https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info?access_token=ACCESS_TOKEN
-func (a *app) ApiGetAuthorizerInfo(authorizerAppId string) (res map[string]interface{}) {
-	params := url.Values{}
-	params = a.token.ApplyAccessToken(params)
-	payload, _ := json.Marshal(map[string]string{
-		"component_appid":  a.config.AppId,
-		"authorizer_appid": authorizerAppId,
-	})
-	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_get_authorizer_info?"+params.Encode(), bytes.NewReader(payload))
-	if response, err := http.DefaultClient.Do(req); err == nil {
-		if resp, err := io.ReadAll(response.Body); err == nil {
-			js, _ := json2.NewJson(resp)
-			logger.Debugf("ApiGetAuthorizerInfo:%+v", js)
-			res = js.MustMap()
-		} else {
-			logger.Errorf("ApiGetAuthorizerInfo:%+v", err)
-		}
-	} else {
-		logger.Errorf("ApiGetAuthorizerInfo:%+v", err)
-	}
-	return
 }
 
 // GetTemplateDraftList GET https://api.weixin.qq.com/wxa/gettemplatedraftlist?access_token=ACCESS_TOKEN
