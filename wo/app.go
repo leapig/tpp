@@ -32,7 +32,12 @@ type App interface {
 	GetAuthorizerOptionInfo(authorizerAccessToken, optionName string) (*json2.Json, error)
 	// ThirdpartyCode2Session 小程序登录 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/login/thirdpartyCode2Session.html
 	ThirdpartyCode2Session(appid, jsCode string) (js *json2.Json, err error)
-
+	// SetPrivacySetting 设置小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/setPrivacySetting.html
+	SetPrivacySetting(authorizerAccessToken string, privacyVer int64, settingList []interface{}, ownerSettingList interface{}, sdkPrivacyInfoList []interface{}) (*json2.Json, error)
+	// GetPrivacySetting 获取小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/getPrivacySetting.html
+	GetPrivacySetting(authorizerAccessToken string, privacyVer int64) (*json2.Json, error)
+	// UploadPrivacySetting 上传小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/uploadPrivacySetting.html
+	UploadPrivacySetting(authorizerAccessToken string, file *bytes.Buffer) (*json2.Json, error)
 	// GetTemplatedRaftList 获取草稿箱列表 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/getTemplatedRaftList.html
 	GetTemplatedRaftList() (*json2.Json, error)
 	// AddToTemplate 将草稿添加到模板库 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/addToTemplate.html
