@@ -3,9 +3,7 @@ package wo
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	json2 "github.com/bitly/go-simplejson"
-	"io"
 	"net/http"
 	"net/url"
 )
@@ -42,16 +40,7 @@ func (a *app) getAuthorizerList(offset int) (js *json2.Json, err error) {
 		"offset":          offset,
 		"count":           batchSize,
 	})
-	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_get_authorizer_list?"+params.Encode(), bytes.NewReader(payload))
-	if response, err := http.DefaultClient.Do(req); err == nil {
-		if resp, err := io.ReadAll(response.Body); err == nil {
-			js, _ := json2.NewJson(resp)
-			if js.Get("errcode") != nil && js.Get("errcode").MustInt() != 0 {
-				err = errors.New(js.Get("errmsg").MustString())
-			}
-		}
-	}
-	return
+	return a.doHttp(http.MethodPost, "/cgi-bin/component/api_get_authorizer_list?"+params.Encode(), bytes.NewReader(payload))
 }
 
 // GetAuthorizerInfo 获取授权账号详情
@@ -64,16 +53,7 @@ func (a *app) GetAuthorizerInfo(authorizerAppId string) (js *json2.Json, err err
 		"component_appid":  a.config.AppId,
 		"authorizer_appid": authorizerAppId,
 	})
-	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/api_get_authorizer_info?"+params.Encode(), bytes.NewReader(payload))
-	if response, err := http.DefaultClient.Do(req); err == nil {
-		if resp, err := io.ReadAll(response.Body); err == nil {
-			js, _ := json2.NewJson(resp)
-			if js.Get("errcode") != nil && js.Get("errcode").MustInt() != 0 {
-				err = errors.New(js.Get("errmsg").MustString())
-			}
-		}
-	}
-	return
+	return a.doHttp(http.MethodPost, "/cgi-bin/component/api_get_authorizer_info?"+params.Encode(), bytes.NewReader(payload))
 }
 
 // SetAuthorizerOptionInfo 设置授权方选项信息
@@ -86,16 +66,7 @@ func (a *app) SetAuthorizerOptionInfo(authorizerAccessToken, optionName, optionV
 		"option_name":  optionName,
 		"option_value": optionValue,
 	})
-	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/set_authorizer_option?"+params.Encode(), bytes.NewReader(payload))
-	if response, err := http.DefaultClient.Do(req); err == nil {
-		if resp, err := io.ReadAll(response.Body); err == nil {
-			js, _ := json2.NewJson(resp)
-			if js.Get("errcode") != nil && js.Get("errcode").MustInt() != 0 {
-				err = errors.New(js.Get("errmsg").MustString())
-			}
-		}
-	}
-	return
+	return a.doHttp(http.MethodPost, a.server+"/cgi-bin/component/set_authorizer_option?"+params.Encode(), bytes.NewReader(payload))
 }
 
 // GetAuthorizerOptionInfo 获取授权方选项信息
@@ -107,14 +78,5 @@ func (a *app) GetAuthorizerOptionInfo(authorizerAccessToken, optionName string) 
 	payload, _ := json.Marshal(map[string]string{
 		"option_name": optionName,
 	})
-	req, _ := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/component/get_authorizer_option?"+params.Encode(), bytes.NewReader(payload))
-	if response, err := http.DefaultClient.Do(req); err == nil {
-		if resp, err := io.ReadAll(response.Body); err == nil {
-			js, _ := json2.NewJson(resp)
-			if js.Get("errcode") != nil && js.Get("errcode").MustInt() != 0 {
-				err = errors.New(js.Get("errmsg").MustString())
-			}
-		}
-	}
-	return
+	return a.doHttp(http.MethodPost, a.server+"/cgi-bin/component/get_authorizer_option?"+params.Encode(), bytes.NewReader(payload))
 }

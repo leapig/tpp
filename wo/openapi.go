@@ -17,11 +17,7 @@ func (a *app) ClearQuota(appId, accessToken string) (js *json2.Json, err error) 
 	payload, _ := json.Marshal(map[string]string{
 		"appid": appId,
 	})
-	req, err := http.NewRequest(http.MethodPost, a.server+"/cgi-bin/clear_quota?"+params.Encode(), bytes.NewReader(payload))
-	if err == nil {
-		js, err = a.do(req)
-	}
-	return
+	return a.doHttp(http.MethodPost, "/cgi-bin/clear_quota?"+params.Encode(), bytes.NewReader(payload))
 }
 
 // GetApiQuota 查询API调用额度
@@ -33,11 +29,7 @@ func (a *app) GetApiQuota(cgiPath, accessToken string) (js *json2.Json, err erro
 	payload, _ := json.Marshal(map[string]string{
 		"cgi_path": cgiPath,
 	})
-	req, err := http.NewRequest(http.MethodPost, a.server+"/openapi/quota/get?"+params.Encode(), bytes.NewReader(payload))
-	if err == nil {
-		js, err = a.do(req)
-	}
-	return
+	return a.doHttp(http.MethodPost, "/cgi-bin/openapi/quota/get?"+params.Encode(), bytes.NewReader(payload))
 }
 
 // GetRidInfo 查询rid信息
