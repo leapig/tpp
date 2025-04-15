@@ -26,7 +26,7 @@ func (a *app) ThirdpartyCode2Session(appid, jsCode string) (*json2.Json, error) 
 // SetPrivacySetting 设置小程序用户隐私保护指引
 // doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/setPrivacySetting.html
 // req POST https://api.weixin.qq.com/cgi-bin/component/setprivacysetting?access_token=ACCESS_TOKEN
-func (a *app) SetPrivacySetting(authorizerAccessToken string, privacyVer int64, settingList []interface{}, ownerSettingList interface{}, sdkPrivacyInfoList []interface{}) (*json2.Json, error) {
+func (a *app) SetPrivacySetting(authorizerAccessToken string, privacyVer int64, settingList, ownerSettingList, sdkPrivacyInfoList interface{}) (*json2.Json, error) {
 	params := url.Values{}
 	params.Add("access_token", authorizerAccessToken)
 	payload, _ := json.Marshal(map[string]interface{}{
