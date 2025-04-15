@@ -33,7 +33,7 @@ type App interface {
 	// ThirdpartyCode2Session 小程序登录 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/login/thirdpartyCode2Session.html
 	ThirdpartyCode2Session(appid, jsCode string) (js *json2.Json, err error)
 	// SetPrivacySetting 设置小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/setPrivacySetting.html
-	SetPrivacySetting(authorizerAccessToken string, privacyVer int64, settingList []interface{}, ownerSettingList interface{}, sdkPrivacyInfoList []interface{}) (*json2.Json, error)
+	SetPrivacySetting(authorizerAccessToken string, privacyVer int64, settingList, ownerSettingList, sdkPrivacyInfoList interface{}) (*json2.Json, error)
 	// GetPrivacySetting 获取小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/getPrivacySetting.html
 	GetPrivacySetting(authorizerAccessToken string, privacyVer int64) (*json2.Json, error)
 	// UploadPrivacySetting 上传小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/uploadPrivacySetting.html
