@@ -166,7 +166,7 @@ func (a *app) doHttp(method string, url string, body io.Reader) (*json2.Json, er
 	if errCode := js.Get("errcode"); errCode != nil && errCode.MustInt() != 0 {
 		return js, errors.New(js.Get("errmsg").MustString())
 	}
-
+	logger.Debugf("\n\n%+v\n", js)
 	return js, nil
 }
 
