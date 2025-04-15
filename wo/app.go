@@ -85,7 +85,7 @@ func NewApp(config Config) App {
 func (a *app) do(req *http.Request) (js *json2.Json, err error) {
 	if response, err := http.DefaultClient.Do(req); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
-			js, _ := json2.NewJson(resp)
+			js, _ = json2.NewJson(resp)
 			if js.Get("errcode") != nil && js.Get("errcode").MustInt() != 0 {
 				err = errors.New(js.Get("errmsg").MustString())
 			}
