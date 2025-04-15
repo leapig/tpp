@@ -22,69 +22,40 @@ type App interface {
 	Id() string
 	// Token 获取Token
 	Token() string
-	// GetAuthorizerList 拉取已授权的账号信息
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerList.html
-	// req POST https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_list?access_token=ACCESS_TOKEN
+	// GetAuthorizerList 拉取已授权的账号信息 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerList.html
 	GetAuthorizerList() ([]*json2.Json, error)
-	// GetAuthorizerInfo 获取授权账号详情
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerInfo.html
-	// req POST https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info?access_token=ACCESS_TOKEN
+	// GetAuthorizerInfo 获取授权账号详情 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerInfo.html
 	GetAuthorizerInfo(authorizerAppId string) (*json2.Json, error)
-	// SetAuthorizerOptionInfo 设置授权方选项信息
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/setAuthorizerOptionInfo.html
-	// req POST https://api.weixin.qq.com/cgi-bin/component/set_authorizer_option?access_token=ACCESS_TOKEN
+	// SetAuthorizerOptionInfo 设置授权方选项信息 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/setAuthorizerOptionInfo.html
 	SetAuthorizerOptionInfo(authorizerAccessToken, optionName, optionValue string) (*json2.Json, error)
-	// GetAuthorizerOptionInfo 获取授权方选项信息
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerOptionInfo.html
-	// req POST https://api.weixin.qq.com/cgi-bin/component/get_authorizer_option?access_token=ACCESS_TOKEN
+	// GetAuthorizerOptionInfo 获取授权方选项信息 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerOptionInfo.html
 	GetAuthorizerOptionInfo(authorizerAccessToken, optionName string) (*json2.Json, error)
-	// GetTemplatedRaftList 获取草稿箱列表
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/getTemplatedRaftList.html
-	// req GET https://api.weixin.qq.com/wxa/gettemplatedraftlist?access_token=ACCESS_TOKEN
+	// ThirdpartyCode2Session 小程序登录 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/login/thirdpartyCode2Session.html
+	ThirdpartyCode2Session(appid, jsCode string) (js *json2.Json, err error)
+
+	// GetTemplatedRaftList 获取草稿箱列表 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/getTemplatedRaftList.html
 	GetTemplatedRaftList() (*json2.Json, error)
-	// AddToTemplate 将草稿添加到模板库
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/addToTemplate.html
-	// req POST https://api.weixin.qq.com/wxa/addtotemplate?access_token=ACCESS_TOKEN
+	// AddToTemplate 将草稿添加到模板库 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/addToTemplate.html
 	AddToTemplate(draftId, templateType int64) (*json2.Json, error)
-	// GetTemplateList 获取模板列表
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/getTemplateList.html
-	// req GET https://api.weixin.qq.com/wxa/gettemplatelist?access_token=ACCESS_TOKEN
+	// GetTemplateList 获取模板列表 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/getTemplateList.html
 	GetTemplateList(templateType int64) (*json2.Json, error)
-	// DeleteTemplate 删除代码模板
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/deleteTemplate.html
-	// req POST https://api.weixin.qq.com/wxa/deletetemplate?access_token=ACCESS_TOKEN
+	// DeleteTemplate 删除代码模板 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/deleteTemplate.html
 	DeleteTemplate(templateId int64) (*json2.Json, error)
-	// ModifyThirdpartyServerDomain 设置第三方平台服务器域名
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/modifyThirdpartyServerDomain.html
-	// req POST https://api.weixin.qq.com/cgi-bin/component/modify_wxa_server_domain?access_token=ACCESS_TOKEN
+	// ModifyThirdpartyServerDomain 设置第三方平台服务器域名 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/modifyThirdpartyServerDomain.html
 	ModifyThirdpartyServerDomain(action, WxaServerDomain string, IsModifyPublishedTogether bool) (*json2.Json, error)
-	// GetThirdpartyJumpDomainConfirmFile 获取第三方平台业务域名校验文件
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/getThirdpartyJumpDomainConfirmFile.html
-	// req POST https://api.weixin.qq.com/cgi-bin/component/get_domain_confirmfile?access_token=ACCESS_TOKEN
+	// GetThirdpartyJumpDomainConfirmFile 获取第三方平台业务域名校验文件 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/getThirdpartyJumpDomainConfirmFile.html
 	GetThirdpartyJumpDomainConfirmFile() (js *json2.Json, err error)
-	// ModifyThirdpartyJumpDomain 设置第三方平台业务域名
-	// https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/modifyThirdpartyJumpDomain.html
-	// req POST https://api.weixin.qq.com/cgi-bin/component/modify_wxa_jump_domain?access_token=ACCESS_TOKEN
+	// ModifyThirdpartyJumpDomain 设置第三方平台业务域名 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/modifyThirdpartyJumpDomain.html
 	ModifyThirdpartyJumpDomain(action, WxaJumpH5Domain string, IsModifyPublishedTogether bool) (*json2.Json, error)
-	// StartPushTicket 开启推送ticket
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/startPushTicket.html
-	// req POST https://api.weixin.qq.com/cgi-bin/component/api_start_push_ticket
+	// StartPushTicket 开启推送ticket https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/startPushTicket.html
 	StartPushTicket() (*json2.Json, error)
-	// GetPreAuthCode 获取预授权码
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/getPreAuthCode.html
-	// req POST https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode?access_token=ACCESS_TOKEN
+	// GetPreAuthCode 获取预授权码 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/getPreAuthCode.html
 	GetPreAuthCode() (*json2.Json, error)
-	// GetAuthorizerAccessToken 获取授权账号调用令牌
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/getAuthorizerAccessToken.html
-	// req POST https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token?component_access_token=ACCESS_TOKEN
+	// GetAuthorizerAccessToken 获取授权账号调用令牌 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/getAuthorizerAccessToken.html
 	GetAuthorizerAccessToken(authorizerAppId, authorizerRefreshToken string) (*json2.Json, error)
-	// GetAuthorizerRefreshToken 获取刷新令牌
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/getAuthorizerRefreshToken.html
-	// req POST https://api.weixin.qq.com/cgi-bin/component/api_query_auth?access_token=ACCESS_TOKEN
+	// GetAuthorizerRefreshToken 获取刷新令牌 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/getAuthorizerRefreshToken.html
 	GetAuthorizerRefreshToken(authorizationCode string) (*json2.Json, error)
-	// GetComponentAccessToken 获取令牌
-	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/getComponentAccessToken.html
-	// req POST https://api.weixin.qq.com/cgi-bin/component/api_component_token
+	// GetComponentAccessToken 获取令牌 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/getComponentAccessToken.html
 	GetComponentAccessToken() (*json2.Json, error)
 }
 

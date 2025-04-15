@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	json2 "github.com/bitly/go-simplejson"
+	"github.com/faabiosr/cachego"
 	"github.com/faabiosr/cachego/file"
 	"github.com/leapig/tpp/logger"
 	"github.com/leapig/tpp/util"
@@ -47,13 +48,14 @@ type App interface {
 type GetComponentAccessToken func() string
 
 type Config struct {
-	Key            string `json:"key"`
-	AppId          string `json:"appid"`
-	Secret         string `json:"secret"`
-	Token          string `json:"token"`
-	AesKey         string `json:"aes_key"`
-	ComponentAppid string `json:"component_appid"`
-	ComponentToken string `json:"component_token"`
+	Key            string        `json:"key"`
+	AppId          string        `json:"appid"`
+	Secret         string        `json:"secret"`
+	Token          string        `json:"token"`
+	AesKey         string        `json:"aes_key"`
+	ComponentAppid string        `json:"component_appid"`
+	ComponentToken string        `json:"component_token"`
+	Cache          cachego.Cache `json:"cache"`
 }
 
 type app struct {
@@ -64,13 +66,15 @@ type app struct {
 
 func NewApp(config Config) App {
 	server := "https://api.weixin.qq.com"
-	// 管理token
+	if config.Cache == nil {
+		config.Cache = file.New(os.TempDir())
+	}
 	return &app{
 		server: server,
 		config: config,
 		token: util.AccessToken{
 			Id:    config.AppId + config.Secret,
-			Cache: file.New(os.TempDir()),
+			Cache: config.Cache,
 			GetRefreshRequestFunc: func() (resp []byte) {
 				if strings.HasPrefix(config.Secret, "refreshtoken@@@") {
 					params := url.Values{}
