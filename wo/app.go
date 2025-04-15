@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	json2 "github.com/bitly/go-simplejson"
+	"github.com/faabiosr/cachego"
 	"github.com/faabiosr/cachego/file"
 	"github.com/leapig/tpp/logger"
 	"github.com/leapig/tpp/util"
@@ -17,42 +18,83 @@ import (
 )
 
 type App interface {
+	// Id 获取AppId
 	Id() string
+	// Token 获取Token
 	Token() string
-	/* authorization-management */
-
+	// GetAuthorizerList 拉取已授权的账号信息
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerList.html
+	// req POST https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_list?access_token=ACCESS_TOKEN
 	GetAuthorizerList() ([]*json2.Json, error)
+	// GetAuthorizerInfo 获取授权账号详情
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerInfo.html
+	// req POST https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info?access_token=ACCESS_TOKEN
 	GetAuthorizerInfo(authorizerAppId string) (*json2.Json, error)
+	// SetAuthorizerOptionInfo 设置授权方选项信息
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/setAuthorizerOptionInfo.html
+	// req POST https://api.weixin.qq.com/cgi-bin/component/set_authorizer_option?access_token=ACCESS_TOKEN
 	SetAuthorizerOptionInfo(authorizerAccessToken, optionName, optionValue string) (*json2.Json, error)
+	// GetAuthorizerOptionInfo 获取授权方选项信息
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerOptionInfo.html
+	// req POST https://api.weixin.qq.com/cgi-bin/component/get_authorizer_option?access_token=ACCESS_TOKEN
 	GetAuthorizerOptionInfo(authorizerAccessToken, optionName string) (*json2.Json, error)
-	/* authorization-management */
-	/* thirdparty-management */
-
+	// GetTemplatedRaftList 获取草稿箱列表
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/getTemplatedRaftList.html
+	// req GET https://api.weixin.qq.com/wxa/gettemplatedraftlist?access_token=ACCESS_TOKEN
 	GetTemplatedRaftList() (*json2.Json, error)
+	// AddToTemplate 将草稿添加到模板库
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/addToTemplate.html
+	// req POST https://api.weixin.qq.com/wxa/addtotemplate?access_token=ACCESS_TOKEN
 	AddToTemplate(draftId, templateType int64) (*json2.Json, error)
+	// GetTemplateList 获取模板列表
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/getTemplateList.html
+	// req GET https://api.weixin.qq.com/wxa/gettemplatelist?access_token=ACCESS_TOKEN
 	GetTemplateList(templateType int64) (*json2.Json, error)
+	// DeleteTemplate 删除代码模板
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/deleteTemplate.html
+	// req POST https://api.weixin.qq.com/wxa/deletetemplate?access_token=ACCESS_TOKEN
 	DeleteTemplate(templateId int64) (*json2.Json, error)
+	// ModifyThirdpartyServerDomain 设置第三方平台服务器域名
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/modifyThirdpartyServerDomain.html
+	// req POST https://api.weixin.qq.com/cgi-bin/component/modify_wxa_server_domain?access_token=ACCESS_TOKEN
 	ModifyThirdpartyServerDomain(action, WxaServerDomain string, IsModifyPublishedTogether bool) (*json2.Json, error)
+	// GetThirdpartyJumpDomainConfirmFile 获取第三方平台业务域名校验文件
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/getThirdpartyJumpDomainConfirmFile.html
+	// req POST https://api.weixin.qq.com/cgi-bin/component/get_domain_confirmfile?access_token=ACCESS_TOKEN
 	GetThirdpartyJumpDomainConfirmFile() (js *json2.Json, err error)
+	// ModifyThirdpartyJumpDomain 设置第三方平台业务域名
+	// https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/modifyThirdpartyJumpDomain.html
+	// req POST https://api.weixin.qq.com/cgi-bin/component/modify_wxa_jump_domain?access_token=ACCESS_TOKEN
 	ModifyThirdpartyJumpDomain(action, WxaJumpH5Domain string, IsModifyPublishedTogether bool) (*json2.Json, error)
-	/* thirdparty-management */
-	/* ticket-token */
-
+	// StartPushTicket 开启推送ticket
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/startPushTicket.html
+	// req POST https://api.weixin.qq.com/cgi-bin/component/api_start_push_ticket
 	StartPushTicket() (*json2.Json, error)
+	// GetPreAuthCode 获取预授权码
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/getPreAuthCode.html
+	// req POST https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode?access_token=ACCESS_TOKEN
 	GetPreAuthCode() (*json2.Json, error)
+	// GetAuthorizerAccessToken 获取授权账号调用令牌
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/getAuthorizerAccessToken.html
+	// req POST https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token?component_access_token=ACCESS_TOKEN
 	GetAuthorizerAccessToken(authorizerAppId, authorizerRefreshToken string) (*json2.Json, error)
+	// GetAuthorizerRefreshToken 获取刷新令牌
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/getAuthorizerRefreshToken.html
+	// req POST https://api.weixin.qq.com/cgi-bin/component/api_query_auth?access_token=ACCESS_TOKEN
 	GetAuthorizerRefreshToken(authorizationCode string) (*json2.Json, error)
+	// GetComponentAccessToken 获取令牌
+	// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/getComponentAccessToken.html
+	// req POST https://api.weixin.qq.com/cgi-bin/component/api_component_token
 	GetComponentAccessToken() (*json2.Json, error)
-	/* ticket-token */
-
 }
 
 type Config struct {
-	AppId  string `json:"appid"`
-	Secret string `json:"secret"`
-	Token  string `json:"token"`
-	AesKey string `json:"aes_key"`
-	Ticket string `json:"ticket"`
+	AppId  string        `json:"appid"`
+	Secret string        `json:"secret"`
+	Token  string        `json:"token"`
+	AesKey string        `json:"aes_key"`
+	Ticket string        `json:"ticket"`
+	Cache  cachego.Cache `json:"cache"`
 }
 
 type app struct {
@@ -63,12 +105,15 @@ type app struct {
 
 func NewApp(config Config) App {
 	server := "https://api.weixin.qq.com"
+	if config.Cache == nil {
+		config.Cache = file.New(os.TempDir())
+	}
 	return &app{
 		server: server,
 		config: config,
 		token: util.AccessToken{
 			Id:    config.AppId + config.Secret,
-			Cache: file.New(os.TempDir()),
+			Cache: config.Cache,
 			GetRefreshRequestFunc: func() (resp []byte) {
 				payload, _ := json.Marshal(map[string]string{
 					"component_appid":         config.AppId,
