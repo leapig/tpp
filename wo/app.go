@@ -46,6 +46,22 @@ type App interface {
 	GetTemplateList(templateType int64) (*json2.Json, error)
 	// DeleteTemplate 删除代码模板 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/deleteTemplate.html
 	DeleteTemplate(templateId int64) (*json2.Json, error)
+	// SubmitAudit 提交代码审核 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/submitAudit.html
+	SubmitAudit(authorizerAccessToken string, itemList interface{}, feedbackInfo, feedbackStuff, versionDesc string, previewInfo map[string]interface{}, ugcDeclare map[string]interface{}, privacyApiNotUse bool, orderPath string) (*json2.Json, error)
+	// GetAuditStatus 查询审核单状态 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getAuditStatus.html
+	GetAuditStatus(authorizerAccessToken string, auditId int64) (*json2.Json, error)
+	// UndoAudit 撤回代码审核 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/undoAudit.html
+	UndoAudit(authorizerAccessToken string) (*json2.Json, error)
+	// Release 发布已通过审核的小程序 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/release.html
+	Release(authorizerAccessToken string) (*json2.Json, error)
+	// GetVersionInfo 查询小程序版本信息 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getVersionInfo.html
+	GetVersionInfo(authorizerAccessToken string) (*json2.Json, error)
+	// GetLatestAuditStatus 查询最新一次提交的审核状态  https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/api/code/get_latest_auditstatus.html
+	GetLatestAuditStatus() (*json2.Json, error)
+	// UploadMediaToCodeAudit 上传提审素材 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/uploadMediaToCodeAudit.html
+	UploadMediaToCodeAudit(authorizerAccessToken string, file *bytes.Buffer) (*json2.Json, error)
+	// GetCodePrivacyInfo 获取隐私接口检测结果 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getCodePrivacyInfo.html
+	GetCodePrivacyInfo(authorizerAccessToken string) (*json2.Json, error)
 	// ModifyThirdpartyServerDomain 设置第三方平台服务器域名 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/modifyThirdpartyServerDomain.html
 	ModifyThirdpartyServerDomain(action, WxaServerDomain string, IsModifyPublishedTogether bool) (*json2.Json, error)
 	// GetThirdpartyJumpDomainConfirmFile 获取第三方平台业务域名校验文件 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/getThirdpartyJumpDomainConfirmFile.html
