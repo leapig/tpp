@@ -124,9 +124,9 @@ func (a *app) GetVersionInfo(authorizerAccessToken string) (*json2.Json, error) 
 // GetLatestAuditStatus 查询最新一次提交的审核状态
 // doc https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/api/code/get_latest_auditstatus.html
 // req GET https://api.weixin.qq.com/wxa/get_latest_auditstatus?access_token=ACCESS_TOKEN
-func (a *app) GetLatestAuditStatus() (*json2.Json, error) {
+func (a *app) GetLatestAuditStatus(authorizerAccessToken string) (*json2.Json, error) {
 	params := url.Values{}
-	params = a.token.ApplyAccessToken(params)
+	params.Add("access_token", authorizerAccessToken)
 	return a.doHttp(http.MethodGet, "/wxa/get_latest_auditstatus?"+params.Encode(), nil)
 }
 

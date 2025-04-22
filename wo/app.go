@@ -57,7 +57,7 @@ type App interface {
 	// GetVersionInfo 查询小程序版本信息 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getVersionInfo.html
 	GetVersionInfo(authorizerAccessToken string) (*json2.Json, error)
 	// GetLatestAuditStatus 查询最新一次提交的审核状态  https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/api/code/get_latest_auditstatus.html
-	GetLatestAuditStatus() (*json2.Json, error)
+	GetLatestAuditStatus(authorizerAccessToken string) (*json2.Json, error)
 	// UploadMediaToCodeAudit 上传提审素材 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/uploadMediaToCodeAudit.html
 	UploadMediaToCodeAudit(authorizerAccessToken string, file *bytes.Buffer) (*json2.Json, error)
 	// GetCodePrivacyInfo 获取隐私接口检测结果 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getCodePrivacyInfo.html
