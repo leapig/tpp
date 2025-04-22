@@ -23,6 +23,24 @@ func (a *app) ThirdpartyCode2Session(appid, jsCode string) (*json2.Json, error) 
 	return a.doHttp(http.MethodGet, "/sns/component/jscode2session?"+params.Encode(), nil)
 }
 
+// GetAccountBasicInfo 获取基本信息
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/basic-info-management/getAccountBasicInfo.html
+// req POST https://api.weixin.qq.com/cgi-bin/account/getaccountbasicinfo?access_token=ACCESS_TOKEN
+func (a *app) GetAccountBasicInfo(authorizerAccessToken string) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	return a.doHttp(http.MethodPost, "/cgi-bin/account/getaccountbasicinfo?"+params.Encode(), nil)
+}
+
+// GetBindOpenAccount 查询绑定的开放平台账号
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/basic-info-management/getBindOpenAccount.html
+// req GET https://api.weixin.qq.com/cgi-bin/open/have?access_token=ACCESS_TOKEN
+func (a *app) GetBindOpenAccount(authorizerAccessToken string) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	return a.doHttp(http.MethodGet, "/cgi-bin/open/have?"+params.Encode(), nil)
+}
+
 // TODO
 
 // SetPrivacySetting 设置小程序用户隐私保护指引

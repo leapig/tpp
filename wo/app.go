@@ -32,6 +32,10 @@ type App interface {
 	GetAuthorizerOptionInfo(authorizerAccessToken, optionName string) (*json2.Json, error)
 	// ThirdpartyCode2Session 小程序登录 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/login/thirdpartyCode2Session.html
 	ThirdpartyCode2Session(appid, jsCode string) (js *json2.Json, err error)
+	// GetAccountBasicInfo 获取基本信息 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/basic-info-management/getAccountBasicInfo.html
+	GetAccountBasicInfo(authorizerAccessToken string) (*json2.Json, error)
+	// GetBindOpenAccount 查询绑定的开放平台账号 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/basic-info-management/getBindOpenAccount.html
+	GetBindOpenAccount(authorizerAccessToken string) (*json2.Json, error)
 	// SetPrivacySetting 设置小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/setPrivacySetting.html
 	SetPrivacySetting(authorizerAccessToken string, privacyVer int64, settingList, ownerSettingList, sdkPrivacyInfoList interface{}) (*json2.Json, error)
 	// GetPrivacySetting 获取小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/getPrivacySetting.html
@@ -46,6 +50,12 @@ type App interface {
 	GetTemplateList(templateType int64) (*json2.Json, error)
 	// DeleteTemplate 删除代码模板 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/deleteTemplate.html
 	DeleteTemplate(templateId int64) (*json2.Json, error)
+	// Commit 上传代码并生成体验版 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/commit.html
+	Commit(authorizerAccessToken, templateId, extJson, userVersion, userDesc string) (*json2.Json, error)
+	// GetCodePage 获取已上传的代码页面列表 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getCodePage.html
+	GetCodePage(authorizerAccessToken string) (*json2.Json, error)
+	// GetTrialQRCode 获取体验版二维码 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getTrialQRCode.html
+	GetTrialQRCode(authorizerAccessToken, path string) ([]byte, error)
 	// SubmitAudit 提交代码审核 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/submitAudit.html
 	SubmitAudit(authorizerAccessToken string, itemList interface{}, feedbackInfo, feedbackStuff, versionDesc string, previewInfo map[string]interface{}, ugcDeclare map[string]interface{}, privacyApiNotUse bool, orderPath string) (*json2.Json, error)
 	// GetAuditStatus 查询审核单状态 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getAuditStatus.html
