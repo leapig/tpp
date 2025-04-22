@@ -30,18 +30,14 @@ type App interface {
 	SetAuthorizerOptionInfo(authorizerAccessToken, optionName, optionValue string) (*json2.Json, error)
 	// GetAuthorizerOptionInfo 获取授权方选项信息 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerOptionInfo.html
 	GetAuthorizerOptionInfo(authorizerAccessToken, optionName string) (*json2.Json, error)
-	// ThirdpartyCode2Session 小程序登录 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/login/thirdpartyCode2Session.html
-	ThirdpartyCode2Session(appid, jsCode string) (js *json2.Json, err error)
-	// GetAccountBasicInfo 获取基本信息 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/basic-info-management/getAccountBasicInfo.html
-	GetAccountBasicInfo(authorizerAccessToken string) (*json2.Json, error)
-	// GetBindOpenAccount 查询绑定的开放平台账号 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/basic-info-management/getBindOpenAccount.html
-	GetBindOpenAccount(authorizerAccessToken string) (*json2.Json, error)
-	// SetPrivacySetting 设置小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/setPrivacySetting.html
-	SetPrivacySetting(authorizerAccessToken string, privacyVer int64, settingList, ownerSettingList, sdkPrivacyInfoList interface{}) (*json2.Json, error)
-	// GetPrivacySetting 获取小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/getPrivacySetting.html
-	GetPrivacySetting(authorizerAccessToken string, privacyVer int64) (*json2.Json, error)
-	// UploadPrivacySetting 上传小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/uploadPrivacySetting.html
-	UploadPrivacySetting(authorizerAccessToken string, file *bytes.Buffer) (*json2.Json, error)
+	// ClearQuota 重置API调用次数 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/openapi/clearQuota.html
+	ClearQuota(appId, accessToken string) (*json2.Json, error)
+	// GetApiQuota 查询API调用额度 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/openapi/getApiQuota.html
+	GetApiQuota(cgiPath, accessToken string) (*json2.Json, error)
+	// GetRidInfo 查询rid信息 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/openapi/getRidInfo.html
+	GetRidInfo(rid, accessToken string) (*json2.Json, error)
+	// ClearComponentQuotaByAppSecret 使用AppSecret重置第三方平台API调用次数 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/openapi/clearComponentQuotaByAppSecret.html
+	ClearComponentQuotaByAppSecret(appid string) (*json2.Json, error)
 	// GetTemplatedRaftList 获取草稿箱列表 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/getTemplatedRaftList.html
 	GetTemplatedRaftList() (*json2.Json, error)
 	// AddToTemplate 将草稿添加到模板库 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/addToTemplate.html
@@ -50,6 +46,36 @@ type App interface {
 	GetTemplateList(templateType int64) (*json2.Json, error)
 	// DeleteTemplate 删除代码模板 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/template-management/deleteTemplate.html
 	DeleteTemplate(templateId int64) (*json2.Json, error)
+	// ModifyThirdpartyServerDomain 设置第三方平台服务器域名 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/modifyThirdpartyServerDomain.html
+	ModifyThirdpartyServerDomain(action, WxaServerDomain string, IsModifyPublishedTogether bool) (*json2.Json, error)
+	// GetThirdpartyJumpDomainConfirmFile 获取第三方平台业务域名校验文件 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/getThirdpartyJumpDomainConfirmFile.html
+	GetThirdpartyJumpDomainConfirmFile() (js *json2.Json, err error)
+	// ModifyThirdpartyJumpDomain 设置第三方平台业务域名 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/modifyThirdpartyJumpDomain.html
+	ModifyThirdpartyJumpDomain(action, WxaJumpH5Domain string, IsModifyPublishedTogether bool) (*json2.Json, error)
+	// BindOpenAccount 绑定开放平台账号 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/openplatform-management/bindOpenAccount.html
+	BindOpenAccount(authorizerAccessToken, openAppid string) (*json2.Json, error)
+	// UnbindOpenAccount 解除绑定开放平台账号 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/openplatform-management/unbindOpenAccount.html
+	UnbindOpenAccount(authorizerAccessToken, openAppid string) (*json2.Json, error)
+	// GetOpenAccount 获取开放平台账号 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/openplatform-management/getOpenAccount.html
+	GetOpenAccount(authorizerAccessToken string) (*json2.Json, error)
+	// CreateOpenAccount 绑定开放平台账号 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/openplatform-management/createOpenAccount.html
+	CreateOpenAccount(authorizerAccessToken string) (*json2.Json, error)
+	// ThirdpartyCode2Session 小程序登录 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/login/thirdpartyCode2Session.html
+	ThirdpartyCode2Session(appid, jsCode string) (js *json2.Json, err error)
+	// GetAccountBasicInfo 获取基本信息 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/basic-info-management/getAccountBasicInfo.html
+	GetAccountBasicInfo(authorizerAccessToken string) (*json2.Json, error)
+	// GetBindOpenAccount 查询绑定的开放平台账号 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/basic-info-management/getBindOpenAccount.html
+	GetBindOpenAccount(authorizerAccessToken string) (*json2.Json, error)
+	// ModifyServerDomain 配置小程序服务器域名 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/domain-management/modifyServerDomain.html
+	ModifyServerDomain(authorizerAccessToken, action string, requestDomain, wsRequestDomain, uploadDomain, downloadDomain, udpDomain, tcpDomain []string) (*json2.Json, error)
+	// ModifyJumpDomain 配置小程序业务域名 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/domain-management/modifyJumpDomain.html
+	ModifyJumpDomain(authorizerAccessToken, action string, webviewDomain []string) (*json2.Json, error)
+	// SetPrivacySetting 设置小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/setPrivacySetting.html
+	SetPrivacySetting(authorizerAccessToken string, privacyVer int64, settingList, ownerSettingList, sdkPrivacyInfoList interface{}) (*json2.Json, error)
+	// GetPrivacySetting 获取小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/getPrivacySetting.html
+	GetPrivacySetting(authorizerAccessToken string, privacyVer int64) (*json2.Json, error)
+	// UploadPrivacySetting 上传小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/uploadPrivacySetting.html
+	UploadPrivacySetting(authorizerAccessToken string, file *bytes.Buffer) (*json2.Json, error)
 	// Commit 上传代码并生成体验版 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/commit.html
 	Commit(authorizerAccessToken, templateId, extJson, userVersion, userDesc string) (*json2.Json, error)
 	// GetCodePage 获取已上传的代码页面列表 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getCodePage.html
@@ -84,12 +110,6 @@ type App interface {
 	UploadMediaToCodeAudit(authorizerAccessToken string, file *bytes.Buffer) (*json2.Json, error)
 	// GetCodePrivacyInfo 获取隐私接口检测结果 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getCodePrivacyInfo.html
 	GetCodePrivacyInfo(authorizerAccessToken string) (*json2.Json, error)
-	// ModifyThirdpartyServerDomain 设置第三方平台服务器域名 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/modifyThirdpartyServerDomain.html
-	ModifyThirdpartyServerDomain(action, WxaServerDomain string, IsModifyPublishedTogether bool) (*json2.Json, error)
-	// GetThirdpartyJumpDomainConfirmFile 获取第三方平台业务域名校验文件 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/getThirdpartyJumpDomainConfirmFile.html
-	GetThirdpartyJumpDomainConfirmFile() (js *json2.Json, err error)
-	// ModifyThirdpartyJumpDomain 设置第三方平台业务域名 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/thirdparty-management/domain-mgnt/modifyThirdpartyJumpDomain.html
-	ModifyThirdpartyJumpDomain(action, WxaJumpH5Domain string, IsModifyPublishedTogether bool) (*json2.Json, error)
 	// StartPushTicket 开启推送ticket https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/startPushTicket.html
 	StartPushTicket() (*json2.Json, error)
 	// GetPreAuthCode 获取预授权码 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ticket-token/getPreAuthCode.html

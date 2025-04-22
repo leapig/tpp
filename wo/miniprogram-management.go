@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // ThirdpartyCode2Session 小程序登录
@@ -41,7 +42,52 @@ func (a *app) GetBindOpenAccount(authorizerAccessToken string) (*json2.Json, err
 	return a.doHttp(http.MethodGet, "/cgi-bin/open/have?"+params.Encode(), nil)
 }
 
-// TODO
+// ModifyServerDomain 配置小程序服务器域名
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/domain-management/modifyServerDomain.html
+// req POST https://api.weixin.qq.com/wxa/modify_domain?access_token=ACCESS_TOKEN
+func (a *app) ModifyServerDomain(authorizerAccessToken, action string, requestDomain, wsRequestDomain, uploadDomain, downloadDomain, udpDomain, tcpDomain []string) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	var body map[string]interface{}
+	if strings.ToLower(action) != "get" {
+		body = map[string]interface{}{
+			"action":          action,
+			"requestdomain":   requestDomain,
+			"wsrequestdomain": wsRequestDomain,
+			"uploaddomain":    uploadDomain,
+			"downloaddomain":  downloadDomain,
+			"udpdomain":       udpDomain,
+			"tcpdomain":       tcpDomain,
+		}
+	} else {
+		body = map[string]interface{}{
+			"action": action,
+		}
+	}
+	payload, _ := json.Marshal(body)
+	return a.doHttp(http.MethodPost, "/wxa/modify_domain?"+params.Encode(), bytes.NewReader(payload))
+}
+
+// ModifyJumpDomain 配置小程序业务域名
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/domain-management/modifyJumpDomain.html
+// req POST https://api.weixin.qq.com/wxa/setwebviewdomain?access_token=ACCESS_TOKEN
+func (a *app) ModifyJumpDomain(authorizerAccessToken, action string, webviewDomain []string) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	var body map[string]interface{}
+	if strings.ToLower(action) != "get" {
+		body = map[string]interface{}{
+			"action":        action,
+			"webviewdomain": webviewDomain,
+		}
+	} else {
+		body = map[string]interface{}{
+			"action": action,
+		}
+	}
+	payload, _ := json.Marshal(body)
+	return a.doHttp(http.MethodPost, "/wxa/setwebviewdomain?"+params.Encode(), bytes.NewReader(payload))
+}
 
 // SetPrivacySetting 设置小程序用户隐私保护指引
 // doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/setPrivacySetting.html
