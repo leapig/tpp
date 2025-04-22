@@ -174,7 +174,7 @@ func (a *app) GetCodePage(authorizerAccessToken string) (*json2.Json, error) {
 // req GET https://api.weixin.qq.com/wxa/get_qrcode?access_token=ACCESS_TOKEN
 func (a *app) GetTrialQRCode(authorizerAccessToken, path string) ([]byte, error) {
 	params := url.Values{}
-	params = a.token.ApplyAccessToken(params)
+	params.Add("access_token", authorizerAccessToken)
 	params.Add("path", url.QueryEscape(path))
 	if response, err := http.Get(a.server + "/wxa/get_qrcode?" + params.Encode()); err == nil {
 		if resp, err := io.ReadAll(response.Body); err == nil {
