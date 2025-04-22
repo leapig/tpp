@@ -98,6 +98,15 @@ func (a *app) GetSettingCategories(authorizerAccessToken string) (*json2.Json, e
 	return a.doHttp(http.MethodGet, "/cgi-bin/wxopen/getcategory?"+params.Encode(), nil)
 }
 
+// GetAllCategoryName 获取类目名称信息
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/category-management/getAllCategoryName.html
+// req GET https://api.weixin.qq.com/wxa/get_category?access_token=ACCESS_TOKEN
+func (a *app) GetAllCategoryName(authorizerAccessToken string) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	return a.doHttp(http.MethodGet, "/wxa/get_category?"+params.Encode(), nil)
+}
+
 // SetPrivacySetting 设置小程序用户隐私保护指引
 // doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/setPrivacySetting.html
 // req POST https://api.weixin.qq.com/cgi-bin/component/setprivacysetting?access_token=ACCESS_TOKEN
