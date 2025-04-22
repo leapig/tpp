@@ -70,6 +70,8 @@ type App interface {
 	ModifyServerDomain(authorizerAccessToken, action string, requestDomain, wsRequestDomain, uploadDomain, downloadDomain, udpDomain, tcpDomain []string) (*json2.Json, error)
 	// ModifyJumpDomain 配置小程序业务域名 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/domain-management/modifyJumpDomain.html
 	ModifyJumpDomain(authorizerAccessToken, action string, webviewDomain []string) (*json2.Json, error)
+	// GetSettingCategories 获取已设置的所有类目 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/category-management/getSettingCategories.html
+	GetSettingCategories(authorizerAccessToken string) (*json2.Json, error)
 	// SetPrivacySetting 设置小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/setPrivacySetting.html
 	SetPrivacySetting(authorizerAccessToken string, privacyVer int64, settingList, ownerSettingList, sdkPrivacyInfoList interface{}) (*json2.Json, error)
 	// GetPrivacySetting 获取小程序用户隐私保护指引 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/getPrivacySetting.html

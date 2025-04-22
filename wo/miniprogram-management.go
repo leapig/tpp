@@ -89,6 +89,15 @@ func (a *app) ModifyJumpDomain(authorizerAccessToken, action string, webviewDoma
 	return a.doHttp(http.MethodPost, "/wxa/setwebviewdomain?"+params.Encode(), bytes.NewReader(payload))
 }
 
+// GetSettingCategories 获取已设置的所有类目
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/category-management/getSettingCategories.html
+// req GET https://api.weixin.qq.com/cgi-bin/wxopen/getcategory?access_token=ACCESS_TOKEN
+func (a *app) GetSettingCategories(authorizerAccessToken string) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	return a.doHttp(http.MethodGet, "/cgi-bin/wxopen/getcategory?"+params.Encode(), nil)
+}
+
 // SetPrivacySetting 设置小程序用户隐私保护指引
 // doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/privacy-management/setPrivacySetting.html
 // req POST https://api.weixin.qq.com/cgi-bin/component/setprivacysetting?access_token=ACCESS_TOKEN
