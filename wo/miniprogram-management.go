@@ -3,7 +3,9 @@ package wo
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	json2 "github.com/bitly/go-simplejson"
+	"io"
 	"net/http"
 	"net/url"
 )
@@ -61,6 +63,59 @@ func (a *app) UploadPrivacySetting(authorizerAccessToken string, file *bytes.Buf
 
 // TODO
 
+// Commit 上传代码并生成体验版
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/commit.html
+// req POST https://api.weixin.qq.com/wxa/commit?access_token=ACCESS_TOKEN
+func (a *app) Commit(authorizerAccessToken, templateId, extJson, userVersion, userDesc string) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	payload, _ := json.Marshal(map[string]interface{}{
+		"template_id":  templateId,
+		"ext_json":     extJson,
+		"user_version": userVersion,
+		"user_desc":    userDesc,
+	})
+	return a.doHttp(http.MethodPost, "/wxa/commit?"+params.Encode(), bytes.NewReader(payload))
+}
+
+// GetCodePage 获取已上传的代码页面列表
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getCodePage.html
+// req GET https://api.weixin.qq.com/wxa/get_page?access_token=ACCESS_TOKEN
+func (a *app) GetCodePage(authorizerAccessToken string) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	return a.doHttp(http.MethodGet, "/wxa/commit?"+params.Encode(), nil)
+}
+
+// GetTrialQRCode 获取体验版二维码
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getTrialQRCode.html
+// req GET https://api.weixin.qq.com/wxa/get_qrcode?access_token=ACCESS_TOKEN
+func (a *app) GetTrialQRCode(authorizerAccessToken, path string) ([]byte, error) {
+	params := url.Values{}
+	params = a.token.ApplyAccessToken(params)
+	params.Add("path", url.QueryEscape(path))
+	if response, err := http.Get(a.server + "/wxa/get_qrcode?" + params.Encode()); err == nil {
+		if resp, err := io.ReadAll(response.Body); err == nil {
+			if response.Header.Get("Content-Type") == "image/jpeg" {
+				return resp, err
+			} else {
+				js, err := json2.NewJson(resp)
+				if err != nil {
+					return nil, err
+				}
+				if js.Get("errcode").MustInt() != 0 {
+					return nil, errors.New(js.Get("errmsg").MustString())
+				}
+				return nil, nil
+			}
+		} else {
+			return nil, err
+		}
+	} else {
+		return nil, err
+	}
+}
+
 // SubmitAudit 提交代码审核
 // doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/submitAudit.html
 // req POST https://api.weixin.qq.com/wxa/submit_audit?access_token=ACCESS_TOKEN
@@ -111,9 +166,75 @@ func (a *app) Release(authorizerAccessToken string) (*json2.Json, error) {
 	return a.doHttp(http.MethodPost, "/wxa/release?"+params.Encode(), bytes.NewReader(payload))
 }
 
+// RevertCodeReleaseGetVersion 小程序版本回退(获取可回退的小程序版本)
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/revertCodeRelease.html
+// req GET https://api.weixin.qq.com/wxa/revertcoderelease?access_token=ACCESS_TOKEN
+func (a *app) RevertCodeReleaseGetVersion(authorizerAccessToken string) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	params.Add("action", "get_history_version")
+	return a.doHttp(http.MethodGet, "/wxa/revertcoderelease?"+params.Encode(), nil)
+}
+
+// RevertCodeReleaseRollback 小程序版本回退(回滚到指定的小程序版本，默认上一个版本)
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/revertCodeRelease.html
+// req GET https://api.weixin.qq.com/wxa/revertcoderelease?access_token=ACCESS_TOKEN
+func (a *app) RevertCodeReleaseRollback(authorizerAccessToken, appVersion string) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	if appVersion != "" {
+		params.Add("app_version", appVersion)
+	}
+	return a.doHttp(http.MethodGet, "/wxa/revertcoderelease?"+params.Encode(), nil)
+}
+
+// GrayRelease 分阶段发布
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/grayRelease.html
+// req POST https://api.weixin.qq.com/wxa/grayrelease?access_token=ACCESS_TOKEN
+func (a *app) GrayRelease(authorizerAccessToken string, grayPercentage int64, supportDebugerFirst, supportExperiencerFirst bool) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	payload, _ := json.Marshal(map[string]interface{}{
+		"gray_percentage":           grayPercentage,
+		"support_debuger_first":     supportDebugerFirst,
+		"support_experiencer_first": supportExperiencerFirst,
+	})
+	return a.doHttp(http.MethodPost, "/wxa/grayrelease?"+params.Encode(), bytes.NewReader(payload))
+}
+
+// GetGrayReleasePlan 获取分阶段发布详情
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getGrayReleasePlan.html
+// req GET https://api.weixin.qq.com/wxa/getgrayreleaseplan?access_token=ACCESS_TOKEN
+func (a *app) GetGrayReleasePlan(authorizerAccessToken string) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	return a.doHttp(http.MethodGet, "/wxa/getgrayreleaseplan?"+params.Encode(), nil)
+}
+
+// SetVisitStatus 设置小程序服务状态
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/setVisitStatus.html
+// req POST https://api.weixin.qq.com/wxa/change_visitstatus?access_token=ACCESS_TOKEN
+func (a *app) SetVisitStatus(authorizerAccessToken string, action string) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	payload, _ := json.Marshal(map[string]interface{}{
+		"action": action,
+	})
+	return a.doHttp(http.MethodPost, "/wxa/change_visitstatus?"+params.Encode(), bytes.NewReader(payload))
+}
+
+// RevertGrayRelease 取消分阶段发布
+// doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/revertGrayRelease.html
+// req GET https://api.weixin.qq.com/wxa/revertgrayrelease?access_token=ACCESS_TOKEN
+func (a *app) RevertGrayRelease(authorizerAccessToken string) (*json2.Json, error) {
+	params := url.Values{}
+	params.Add("access_token", authorizerAccessToken)
+	return a.doHttp(http.MethodGet, "/wxa/revertgrayrelease?"+params.Encode(), nil)
+}
+
 // GetVersionInfo 查询小程序版本信息
 // doc https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getVersionInfo.html
-// POST https://api.weixin.qq.com/wxa/getversioninfo?access_token=ACCESS_TOKEN
+// req POST https://api.weixin.qq.com/wxa/getversioninfo?access_token=ACCESS_TOKEN
 func (a *app) GetVersionInfo(authorizerAccessToken string) (*json2.Json, error) {
 	params := url.Values{}
 	params.Add("access_token", authorizerAccessToken)

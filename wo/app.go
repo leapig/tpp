@@ -54,6 +54,18 @@ type App interface {
 	UndoAudit(authorizerAccessToken string) (*json2.Json, error)
 	// Release 发布已通过审核的小程序 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/release.html
 	Release(authorizerAccessToken string) (*json2.Json, error)
+	// RevertCodeReleaseGetVersion 小程序版本回退(获取可回退的小程序版本) https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/revertCodeRelease.html
+	RevertCodeReleaseGetVersion(authorizerAccessToken string) (*json2.Json, error)
+	// RevertCodeReleaseRollback 小程序版本回退(回滚到指定的小程序版本，默认上一个版本) https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/revertCodeRelease.html
+	RevertCodeReleaseRollback(authorizerAccessToken, appVersion string) (*json2.Json, error)
+	// GrayRelease 分阶段发布 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/grayRelease.html
+	GrayRelease(authorizerAccessToken string, grayPercentage int64, supportDebugerFirst, supportExperiencerFirst bool) (*json2.Json, error)
+	// GetGrayReleasePlan 获取分阶段发布详情 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getGrayReleasePlan.html
+	GetGrayReleasePlan(authorizerAccessToken string) (*json2.Json, error)
+	// SetVisitStatus 设置小程序服务状态 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/setVisitStatus.html
+	SetVisitStatus(authorizerAccessToken string, action string) (*json2.Json, error)
+	// RevertGrayRelease 取消分阶段发布 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/revertGrayRelease.html
+	RevertGrayRelease(authorizerAccessToken string) (*json2.Json, error)
 	// GetVersionInfo 查询小程序版本信息 https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/miniprogram-management/code-management/getVersionInfo.html
 	GetVersionInfo(authorizerAccessToken string) (*json2.Json, error)
 	// GetLatestAuditStatus 查询最新一次提交的审核状态  https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/api/code/get_latest_auditstatus.html
