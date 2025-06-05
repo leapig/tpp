@@ -5,16 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	json2 "github.com/bitly/go-simplejson"
-	"github.com/faabiosr/cachego"
-	"github.com/faabiosr/cachego/file"
-	"github.com/leapig/tpp/logger"
-	"github.com/leapig/tpp/util"
 	"io"
 	"net/http"
 	"os"
 	"sync"
 	"time"
+
+	json2 "github.com/bitly/go-simplejson"
+	"github.com/faabiosr/cachego"
+	"github.com/faabiosr/cachego/file"
+	"github.com/leapig/tpp/logger"
+	"github.com/leapig/tpp/util"
 )
 
 type App interface {
@@ -216,6 +217,7 @@ func (a *app) doHttp(method string, url string, body io.Reader) (*json2.Json, er
 	}(response.Body)
 
 	resp, err := io.ReadAll(response.Body)
+	logger.Debugf("\n\n%+v\n", string(resp))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
