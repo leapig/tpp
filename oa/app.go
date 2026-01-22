@@ -5,17 +5,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	json2 "github.com/bitly/go-simplejson"
-	"github.com/faabiosr/cachego"
-	"github.com/faabiosr/cachego/file"
-	"github.com/leapig/tpp/logger"
-	"github.com/leapig/tpp/util"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 	"time"
+
+	json2 "github.com/bitly/go-simplejson"
+	"github.com/faabiosr/cachego"
+	"github.com/faabiosr/cachego/file"
+	"github.com/leapig/tpp/logger"
+	"github.com/leapig/tpp/util"
 )
 
 const JSAPI = "jsapi"
@@ -249,7 +250,7 @@ func (a *app) MessageTemplateSend(msg Message) (err error) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("MessageTemplateSend:%+v", js)
 			if js.Get("errcode").MustInt() != 0 {
-				err = errors.New(js.Get("errmsg").MustString())
+				return errors.New(js.Get("errmsg").MustString())
 			}
 		} else {
 			logger.Errorf("MessageTemplateSend:%+v", err)
@@ -516,7 +517,7 @@ func (a *app) OpenBind(openAppid string) (err error) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("OpenBind:%+v", js)
 			if js.Get("errcode").MustInt() != 0 {
-				err = errors.New(js.Get("errmsg").MustString())
+				return errors.New(js.Get("errmsg").MustString())
 			}
 		} else {
 			logger.Errorf("OpenBind:%+v", err)
@@ -541,7 +542,7 @@ func (a *app) OpenUnBind(openAppid string) (err error) {
 			js, _ := json2.NewJson(resp)
 			logger.Debugf("OpenUnBind:%+v", js)
 			if js.Get("errcode").MustInt() != 0 {
-				err = errors.New(js.Get("errmsg").MustString())
+				return errors.New(js.Get("errmsg").MustString())
 			}
 		} else {
 			logger.Errorf("OpenUnBind:%+v", err)

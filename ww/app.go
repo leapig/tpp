@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	json2 "github.com/bitly/go-simplejson"
-	"github.com/faabiosr/cachego/file"
-	"github.com/leapig/tpp/util"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
+
+	json2 "github.com/bitly/go-simplejson"
+	"github.com/faabiosr/cachego/file"
+	"github.com/leapig/tpp/util"
 )
 
 type App interface {
@@ -250,7 +251,7 @@ func (a *app) MessageSend(msg Message) (err error) {
 		if resp, err := io.ReadAll(response.Body); err == nil {
 			js, _ := json2.NewJson(resp)
 			if js.Get("errcode").MustInt() != 0 {
-				err = errors.New(js.Get("errmsg").MustString())
+				return errors.New(js.Get("errmsg").MustString())
 			}
 		}
 	}
