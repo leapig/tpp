@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"github.com/nfnt/resize"
 	"image"
 	_ "image/gif"
 	"image/jpeg"
@@ -13,6 +12,8 @@ import (
 	_ "image/png"
 	"math/rand"
 	"time"
+
+	"github.com/nfnt/resize"
 )
 
 func CompressBase64(base64Str string, targetSize int64) (string, error) {
@@ -112,6 +113,9 @@ func resizeImage(str string) string {
 	}
 	width := img.Bounds().Dx()
 	height := img.Bounds().Dy()
+	if width <= 420 && height <= 420 {
+		return str
+	}
 	var targetWidth, targetHeight uint
 	if width >= height {
 		radio := height / 420
